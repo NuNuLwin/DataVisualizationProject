@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
+    "axios": "^1.8.3",
     "cra-template-redux": "2.0.0",
+    "d3": "^7.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
