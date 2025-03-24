@@ -1,14 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import InstitutionCollaboration from "./pages/InstitutionCollaboration";
+import Index from "./pages/index";
+
 function App() {
   return (
     <>
       <Router>
         <div>
           <Routes>
-            {/* <Route path="/" element={<Dashboard />} /> */}
-            <Route path="/" element={<InstitutionCollaboration />} />
+            <Route path="/" element={<Index />} />
           </Routes>
         </div>
       </Router>
