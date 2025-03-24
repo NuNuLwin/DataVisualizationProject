@@ -1,7 +1,7 @@
 import { useState } from "react";
 // components
-import { BarChart } from "../components/BarChart/BarChart";
-import { SunburstChart } from "../components/Sunburst/SunburstChart";
+import { BarChart } from "../components/ArticlesBarChart/BarChart";
+import { SunburstChart } from "../components/TopicSunburst/SunburstChart";
 // css
 import "./TopicTrend.css";
 
