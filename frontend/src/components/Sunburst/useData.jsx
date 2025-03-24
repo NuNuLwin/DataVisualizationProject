@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { json } from "d3";
 
 const url =
-  "https://gist.githubusercontent.com/NuNuLwin/453b8578c2ff0f6b6d1ebd801582bee4/raw/399ecbf5f9a15ff649ccebeb9d751224b4790c59/sunburst_data.json";
+  "https://gist.githubusercontent.com/NuNuLwin/453b8578c2ff0f6b6d1ebd801582bee4/raw/c3aa65e87a3e7c5854f915756c4581b60f6070ce/sunburst_data.json";
 
 export const useData = () => {
   const [data, setData] = useState(null);

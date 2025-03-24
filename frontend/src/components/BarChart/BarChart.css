@@ -1,0 +1,25 @@
+.citation-chart .tick line {
+  stroke: #c0c0bb;
+}
+
+.citation-chart .tick text {
+  fill: #635f5d;
+}
+
+.citation-chart .mark {
+  fill: #137b80;
+}
+
+.citation-chart .axis-label {
+  font-size: 2em;
+  fill: #635f5d;
+}
+
+.citation-chart .tooltip {
+  width: 50px;
+  height: 30px;
+  background-color: #635f5d;
+  position: absolute;
+  text-align: center;
+  border-radius: 5px;
+}

@@ -19,21 +19,24 @@ import { useData } from "./useData";
 /* css */
 import "./SunburstChart.css";
 
-const RADIUS_DIVIDER = 13;
+const RADIUS_DIVIDER = 15;
 const VIEWBOX_MIN_X = (w) => -1 * (w / 2);
-const VIEWBOX_MIN_Y = (h) => -1 * (h / 3.0);
+const VIEWBOX_MIN_Y = (h) => -1 * (h / 2.2);
 const DEFAULT_MAIN_TITLE = "Science";
 const TEXT_WRAP_COUNT = (18 / RADIUS_DIVIDER) * 10;
 
 export const SunburstChart = ({
   width = window.innerWidth,
   height = window.innerHeight,
+  onSelectedTopic,
 }) => {
   const radius = width / RADIUS_DIVIDER;
 
   const [loading, setLoading] = useState(true);
   const svgRef = useRef();
   const data = useData();
+
+  console.log("=== DATA ===", data);
 
   let parent = null;
   let root = null;
@@ -166,6 +169,7 @@ export const SunburstChart = ({
       .attr("class", "main-title-wrapper")
       .append("text")
       .attr("class", "main-title")
+      .style("font-weight", "bold")
       .text(DEFAULT_MAIN_TITLE);
   };
 
@@ -199,14 +203,43 @@ export const SunburstChart = ({
         .style("cursor", "pointer")
         .on("click", clicked);
 
+      path
+        .filter((d) => d.children === undefined)
+        .style("cursor", "pointer")
+        .on("click", topicClicked);
+
       const format = d3Format(",d");
       path.append("title").text(
-        (d) =>
-          `${d
-            .ancestors()
-            .map((d) => d.data.name)
-            .reverse()
-            .join("/")}\n${format(d.value)}`
+        (d) => {
+          //   {
+          //   d.ancestors().length
+          // }
+          let titleStr = "";
+          let length = d.ancestors().length;
+          if (length > 1) {
+            titleStr += `${"Domain: " + d.ancestors()[length - 2].data.name}`;
+          }
+          if (length > 2) {
+            titleStr += `${"\nField: " + d.ancestors()[length - 3].data.name}`;
+          }
+          if (length > 3) {
+            titleStr += `${
+              "\nSub Field: " + d.ancestors()[length - 4].data.name
+            }`;
+          }
+          if (length > 4) {
+            titleStr += `${"\nTopic: " + d.ancestors()[length - 5].data.name}`;
+          }
+          titleStr += `${"\n\nWorks: " + format(d.value).toString()}`;
+
+          return titleStr;
+        }
+
+        // `${d
+        //   .ancestors()
+        //   .map((d) => d.data.name)
+        //   .reverse()
+        //   .join("/")}\nWorks: ${format(d.value)}`
       );
       label = labelGenerator(svgRef.current, root);
 
@@ -215,6 +248,10 @@ export const SunburstChart = ({
   }, [svgRef.current, data]);
 
   /* Events */
+  function topicClicked(event, p) {
+    onSelectedTopic(p);
+  }
+
   function clicked(event, p) {
     // set main title of sunburst for clicked element name
     d3Select(".main-title").text(p?.data?.name || DEFAULT_MAIN_TITLE);
@@ -284,7 +321,13 @@ export const SunburstChart = ({
   }
 
   return (
-    <div className="sunburst-chart">
+    <div
+      className="sunburst-chart"
+      style={{
+        width,
+        height,
+      }}
+    >
       {loading && <pre>Loading...</pre>}
       <svg
         viewBox={`${VIEWBOX_MIN_X(width)}, ${VIEWBOX_MIN_Y(
