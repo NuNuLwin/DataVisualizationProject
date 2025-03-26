@@ -1,10 +1,14 @@
 import React from "react";
 import { TopicTrend } from "./TopicTrend";
+import { ArticleTrend } from "./ArticleTrend";
+/* css */
+import "./index.css";
 
 function Index() {
   return (
-    <div>
+    <div className="content-wrapper">
       <TopicTrend />
+      <ArticleTrend />
     </div>
   );
 }

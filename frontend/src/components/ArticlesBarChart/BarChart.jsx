@@ -34,6 +34,8 @@ export const BarChart = ({
     return <div>Loading...</div>;
   }
 
+  console.log("data..", data);
+
   // data = data.slice(0, 11);
 
   //   if (!selectedTopic) {
@@ -63,7 +65,7 @@ export const BarChart = ({
     .domain([0, max(data, xValue)]) // Zero to Max of Citation value
     .range([0, innerWidth]); // Length of X axis
 
-  const yValue = (d) => d.display_name;
+  const yValue = (d) => `${d.display_name}-${d.cited_by_count}`;
   const yScale = scaleBand() // Ideal for ordinal or categorical dimension
     .domain(data.map(yValue)) // To point which value to use as Y axis
     .range([0, innerHeight]) // Length of Y axis
@@ -72,11 +74,11 @@ export const BarChart = ({
   return (
     <div className="citation-chart">
       <center>
-        <label htmlFor="perPage">Articles: </label>
+        <label htmlFor="perPage">Works: </label>
         <select id="perPage" value={perPage} onChange={handlePerPageChange}>
           <option value={5}>5</option>
           <option value={10}>10</option>
-          <option value={20}>20</option>
+          <option value={15}>15</option>
         </select>
       </center>
 

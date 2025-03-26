@@ -15,7 +15,7 @@ export const TopicTrend = () => {
   };
 
   return (
-    <div className="topic-trend-wrapper">
+    <div className="card topic-trend-wrapper">
       <h2>
         <center>
           Top Research Topics Across Life/Physical/Social/Health Science
@@ -25,19 +25,24 @@ export const TopicTrend = () => {
         width={window.innerWidth}
         height={window.innerHeight}
         onSelectedTopic={handleSelectedTopic}
+        selectedTopic={selectedTopic}
       />
-      {selectedTopic?.data?.name && (
+      <h2>
+        <center>Top Works for Topic : {selectedTopic?.data?.name}</center>
+      </h2>
+      {selectedTopic?.data?.name ? (
         <>
-          <h2>
-            <center>
-              Top Articles for Topic : {selectedTopic?.data?.name}
-            </center>
-          </h2>
           <BarChart
-            width={window.innerWidth}
-            height={window.innerHeight}
+            width={window.innerWidth - 200}
+            height={window.innerHeight - 200}
             selectedTopic={selectedTopic}
           />
+        </>
+      ) : (
+        <>
+          <center>
+            Please select one topic from the above Sunburst to show Top Works.
+          </center>
         </>
       )}
     </div>

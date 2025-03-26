@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 
-export const useData = (selectedTopic, perPage = 10) => {
+export const useData = (selectedField, perPage = 10) => {
   const [data, setData] = useState(null);
-
-  console.log("selectedTopic..", selectedTopic?.data?.id);
-  console.log("perPage..", perPage);
 
   const formatText = (text) => {
     if (!text) return text;
@@ -23,10 +20,10 @@ export const useData = (selectedTopic, perPage = 10) => {
 
   useEffect(() => {
     // Fetch data only if a topic is selected
-    if (selectedTopic?.data?.id && perPage) {
+    if (selectedField?.id) {
       const fetchData = async () => {
-        const url = `https://api.openalex.org/works?filter=primary_topic.id:${encodeURIComponent(
-          selectedTopic.data.id
+        const url = `https://api.openalex.org/works?filter=primary_topic.field.id:${encodeURIComponent(
+          selectedField.id
         )}&sort=cited_by_count:desc&per_page=${perPage}`;
 
         try {
@@ -38,14 +35,22 @@ export const useData = (selectedTopic, perPage = 10) => {
           console.log("result..", result);
 
           // Remove HTML tags and format text
-          const cleanedResults = result.results.map((r) => ({
-            ...r,
-            display_name: formatText(
-              r.display_name
-                ? r.display_name.replace(/<\/?[^>]+(>|$)/g, "")
-                : "Untitled"
-            ),
-          }));
+          const cleanedResults = [];
+          result.results.map((r) => {
+            r.counts_by_year.map((cby) => {
+              let articleName = r.display_name || "Untitled";
+              if (r.publication_year) {
+                articleName += `(${r.publication_year})`;
+              }
+              let obj = {
+                name: articleName.replace(/<\/?[^>]+(>|$)/g, " "),
+                year: cby.year,
+                cited_by_count: cby.cited_by_count,
+                oa_status: r.open_access.oa_status,
+              };
+              cleanedResults.push(obj);
+            });
+          });
 
           setData(cleanedResults);
         } catch (error) {
@@ -58,7 +63,7 @@ export const useData = (selectedTopic, perPage = 10) => {
     } else {
       setData([]);
     }
-  }, [selectedTopic, perPage]);
+  }, [selectedField, perPage]);
 
   return data;
 };

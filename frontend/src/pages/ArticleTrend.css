@@ -1,0 +1,21 @@
+.field-dropdown {
+  display: flex;
+  justify-content: center;
+}
+
+.field-dropdown .dropdown-toggle {
+  width: 150px;
+}
+
+.article-trend-wrapper {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  padding: 2em 0em 2em 0em;
+}
+
+.article-trend-wrapper .dropdown-menu {
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: 150px;
+}
