@@ -11,6 +11,8 @@ import {
   quantize,
   select as d3Select,
   scaleOrdinal,
+  schemeTableau10,
+  select,
 } from "d3";
 
 /* components */
@@ -22,21 +24,20 @@ import "./SunburstChart.css";
 const RADIUS_DIVIDER = 14.5;
 const VIEWBOX_MIN_X = (w) => -1 * (w / 2);
 const VIEWBOX_MIN_Y = (h) => -1 * (h / 2.1);
-const DEFAULT_MAIN_TITLE = "Science";
+const DEFAULT_MAIN_TITLE = "Physical Sciences";
 const TEXT_WRAP_COUNT = (18 / RADIUS_DIVIDER) * 10;
 
 export const SunburstChart = ({
   width = window.innerWidth,
   height = window.innerHeight,
   onSelectedTopic,
+  selectedDomain,
 }) => {
   const radius = width / RADIUS_DIVIDER;
 
   const [loading, setLoading] = useState(true);
   const svgRef = useRef();
-  const data = useData();
-
-  console.log("=== DATA ===", data);
+  const data = useData(selectedDomain);
 
   let parent = null;
   let root = null;
@@ -191,16 +192,17 @@ export const SunburstChart = ({
       .append("text")
       .attr("class", "main-title")
       .style("font-weight", "bold")
-      .text(DEFAULT_MAIN_TITLE);
+      .text(selectedDomain);
   };
 
   /* Hooks */
   useEffect(() => {
     if (svgRef.current && data) {
       setLoading(false);
-      const color = scaleOrdinal(
-        quantize(interpolateRainbow, data.children.length + 1)
-      );
+      // const color = scaleOrdinal(
+      //   quantize(interpolateRainbow, data.children.length + 1)
+      // );
+      const color = scaleOrdinal(schemeTableau10);
       const chartHierarchy = hierarchy(data)
         .sum((d) => d.value)
         .sort((a, b) => b.value - a.value);
@@ -237,20 +239,21 @@ export const SunburstChart = ({
           // }
           let titleStr = "";
           let length = d.ancestors().length;
+
           if (length > 1) {
-            titleStr += `${"Domain: " + d.ancestors()[length - 2].data.name}`;
+            titleStr += `${"Field: " + d.ancestors()[length - 2].data.name}`;
           }
           if (length > 2) {
-            titleStr += `${"\nField: " + d.ancestors()[length - 3].data.name}`;
-          }
-          if (length > 3) {
             titleStr += `${
-              "\nSub Field: " + d.ancestors()[length - 4].data.name
+              "\nSub Field: " + d.ancestors()[length - 3].data.name
             }`;
           }
-          if (length > 4) {
-            titleStr += `${"\nTopic: " + d.ancestors()[length - 5].data.name}`;
+          if (length > 3) {
+            titleStr += `${"\nTopic: " + d.ancestors()[length - 4].data.name}`;
           }
+          // if (length > 4) {
+          //   titleStr += `${"\nTopic: " + d.ancestors()[length - 5].data.name}`;
+          // }
           titleStr += `${"\n\nWorks: " + format(d.value).toString()}`;
 
           return titleStr;
@@ -266,7 +269,7 @@ export const SunburstChart = ({
 
       parent = circleGenerator(svgRef.current, root, radius);
     }
-  }, [svgRef.current, data]);
+  }, [data, selectedDomain]);
 
   /* Events */
   function topicClicked(event, p) {
@@ -275,7 +278,7 @@ export const SunburstChart = ({
 
   function clicked(event, p) {
     // set main title of sunburst for clicked element name
-    d3Select(".main-title").text(p?.data?.name || DEFAULT_MAIN_TITLE);
+    d3Select(".main-title").text(p?.data?.name || selectedDomain);
 
     parent.datum(p.parent || root);
 
