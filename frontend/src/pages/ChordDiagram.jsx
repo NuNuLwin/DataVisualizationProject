@@ -6,7 +6,7 @@ const ChordDiagram = ({ matrix, institutions }) => {
 
   
   useEffect(() => {
-    console.log("Chord Diagram matrix ",matrix+" institution "+institutions);
+   // console.log("Chord Diagram matrix ",matrix+" institution "+institutions);
     if (!matrix || !institutions) return;
 
     const width = 800;
@@ -66,25 +66,47 @@ const ChordDiagram = ({ matrix, institutions }) => {
       .attr("d", arc)
       .style("fill", (d) => color(d.index))
       .style("opacity", 0.5) 
-      .style("stroke", "white");
+      .style("stroke", "white")
+      .on("mouseover", (event, d) => {
+        // Show tooltip on hover
+        const institution = institutions[d.index];
+        const count = collaborationCounts[d.index];
+  
+         // Show tooltip on hover
+        tooltip
+        .style("visibility", "visible")
+        .html(`
+          ${institution}<br>
+           Total Collaborations: ${count}
+        `);
 
-      
-      // Add collaboration count inside the arcs
-//     arcs.each((d) => {
-//       const name = institutions[d.index];
-//       const count = collaborationCounts[d.index]; // Get collaboration count for this institution
-//       console.log(" inst name "+name+" count "+count);
+          // Highlight the hovered chord and hide others
+          d3.selectAll("path")  // Hide all chords
+            .style("opacity", 0.1);
+        
+          // // Show the hovered chord
+          // d3.select(event.currentTarget)
+          //   .style("opacity", 1);
 
-//   //    const angle = (d.startAngle + d.endAngle) / 2; // Midpoint angle of the arc
-
-//       // svg.append("text")
-//       //   .attr("transform", `rotate(${angle * 180 / Math.PI}) translate(${innerRadius + (outerRadius - innerRadius) / 2}, 0)`)
-//       //   .attr("text-anchor", "middle")
-//       //   .style("font-size", "12px")
-//       //   .style("fill", "black")
-//       //   .text(count); // Display collaboration count
-
-//     });
+          // Show associated arcs
+          arcs.filter((arcData) => arcData.index === d.index )
+            .style("opacity", 1); 
+      })
+      .on("mousemove", (event) => {
+        // Move tooltip with the mouse
+        tooltip
+          .style("top", `${event.pageY - 10}px`)
+          .style("left", `${event.pageX + 10}px`);
+      })
+      .on("mouseout", () => {
+        // Hide tooltip on mouseout
+        tooltip.style("visibility", "hidden");
+  
+        // Restore the opacity of all chords when mouseout
+        d3.selectAll("path")
+        .style("opacity", 0.5);
+  
+      });
 
     // Draw chords (relationships)
     const chordPaths = svg.append("g")
@@ -109,17 +131,6 @@ const ChordDiagram = ({ matrix, institutions }) => {
           <strong>${sourceInstitution}</strong> ↔ <strong>${targetInstitution}</strong><br>
           Collaborations: ${collaborationCount}
         `);
-
-        //  // Hide all other chords and arcs
-        //  chordPaths.style("opacity", 0); // Hide all chords
-        //  arcs.style("opacity", 0); // Hide all arcs
- 
-        //  // Show only the hovered chord and its associated arcs
-        //  d3.select(event.currentTarget).style("opacity", 0.5); // Show hovered chord
-        //  arcs.filter((arcData) => arcData.index === d.source.index || arcData.index === d.target.index)
-        //    .style("opacity", 0.5); // Show associated arcs
-
-
         // Highlight the hovered chord and hide others
         d3.selectAll("path")  // Hide all chords
           .style("opacity", 0.1);
@@ -141,10 +152,6 @@ const ChordDiagram = ({ matrix, institutions }) => {
       // Hide tooltip on mouseout
       tooltip.style("visibility", "hidden");
 
-    //    // Reset opacity of all chords and arcs
-    //    chordPaths.style("opacity", 0.5); // Reset chords
-    //    arcs.style("opacity", 0.5); // Reset arcs
-
       // Restore the opacity of all chords when mouseout
       d3.selectAll("path")
       .style("opacity", 0.5);
@@ -164,7 +171,8 @@ const ChordDiagram = ({ matrix, institutions }) => {
       .attr("text-anchor", (d) => (d.angle > Math.PI ? "end" : null))
       .text((d) => institutions[d.index])
        .attr("dy", "-0.5em") // Adjust vertical alignment for multi-line text
-      .style("font-size", "12px")
+      .style("font-size", "14px")
+      .style("font-weight", "bold")
       .style("fill", "black")
       .style("pointer-events", "none")
       .each(function (d) {
@@ -188,12 +196,12 @@ const ChordDiagram = ({ matrix, institutions }) => {
         //   .attr("dy", "1.2em") // Adjust line spacing
         //   .text(line2);
 
-        // Add the third line (collaboration count)
-        text.append("tspan")
-        .attr("x", 0)
-        .attr("dy", "1.2em") // Adjust line spacing
-        .style("font-weight", "bold")
-        .text(` ${count}`); //.text(`Collaboration Count: ${count}`); // Display collaboration count
+        // // Add the third line (collaboration count)
+        // text.append("tspan")
+        // .attr("x", 0)
+        // .attr("dy", "1.2em") // Adjust line spacing
+        // .style("font-weight", "bold")
+        // .text(` ${count}`); //.text(`Collaboration Count: ${count}`); // Display collaboration count
       });
 
   }, [matrix, institutions]);

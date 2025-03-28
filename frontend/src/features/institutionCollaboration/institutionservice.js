@@ -8,17 +8,16 @@ const getInstitutionCollaboration = async(conceptId,year)=>{
   console.log("institutionService  conceptId ",conceptId+" year "+year);
   var url = "";
   if ((!conceptId || conceptId.trim() === "") && (!year|| year.trim() === "")) {
-     url = `${API_URL}works?per-page=20`; 
-    //url = `${API_URL}works?filter=concepts.id:C127313418&per_page=20`;
+     url = `${API_URL}works?per-page=200`; 
   }
   else if(conceptId && (!year|| year.trim() === "") ){
-    url = `${API_URL}works?filter=concepts.id:${conceptId}&per_page=20`;
+    url = `${API_URL}works?filter=concepts.id:${conceptId}&per_page=100`;
   }
   else if((!conceptId || conceptId.trim() === "") && year){
-    url = `${API_URL}works?filter=year:${year}&per_page=20`;
+    url = `${API_URL}works?filter=publication_year:${year}&per_page=100`;
   }
   else if(conceptId && year){
-    url = `${API_URL}works?filter=concepts.id:${conceptId}&filter=publication_year:${year}&per_page=20`;
+    url = `${API_URL}works?filter=concepts.id:${conceptId},publication_year:${year}&per_page=200`;
   }
   console.log("institutionService work url based on param ",url);
   const response = await axios.get(url);
