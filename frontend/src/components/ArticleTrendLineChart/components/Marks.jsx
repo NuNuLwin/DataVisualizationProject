@@ -6,16 +6,12 @@ export const Marks = ({
   yScale,
   xValue,
   yValue,
-  tooltipFormat,
-  circleRadius,
   onPointerEnter,
   onPointerMove,
   onPointerLeave,
   onTouchStart,
   color,
 }) => {
-  // console.log("=== MARKS DATA ===", color);
-
   return (
     <g className="marks">
       <path
@@ -31,12 +27,6 @@ export const Marks = ({
         onPointerLeave={onPointerLeave}
         onTouchStart={onTouchStart}
       />
-      {/*{data.map((d) => (
-        <circle cx={xScale(xValue(d))} cy={yScale(yValue(d))} r={circleRadius}>
-           <text>{tooltipFormat(xValue(d))}</text> 
-          <text>{xValue(d)}</text>
-        </circle>
-      ))}*/}
     </g>
   );
 };

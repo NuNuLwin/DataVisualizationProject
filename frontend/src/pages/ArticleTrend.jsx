@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 /* components */
 import { LineChart } from "../components/ArticleTrendLineChart/LineChart";
+import { Loading } from "../components/Loading";
 /* css */
 import "./ArticleTrend.css";
 
@@ -46,7 +47,7 @@ export const ArticleTrend = () => {
         </center>
       </h2>
       {loading ? (
-        <pre>Loading...</pre>
+        <Loading marginLeft={0} />
       ) : (
         <div className="field-dropdown">
           <button
@@ -61,7 +62,7 @@ export const ArticleTrend = () => {
             {dropdownMenus.map((menu) =>
               menu.levels.map((level) => (
                 <li>
-                  <a
+                  <span
                     className="dropdown-item"
                     href="#"
                     onClick={() => {
@@ -69,7 +70,7 @@ export const ArticleTrend = () => {
                     }}
                   >
                     {level.name}
-                  </a>
+                  </span>
                 </li>
               ))
             )}

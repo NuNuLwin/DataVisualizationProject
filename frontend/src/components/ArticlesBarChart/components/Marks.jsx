@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { select } from "d3";
+import { select, format, color } from "d3";
+
+const d3Format = format(",");
 
 export const Marks = ({
   data,
@@ -7,7 +9,11 @@ export const Marks = ({
   yScale,
   xValue,
   yValue,
-  tooltipFormat,
+  colorScale,
+  colorDataMap,
+  colorValue,
+  pubYearValue,
+  selected,
 }) => {
   const rectRefs = useRef([]);
 
@@ -30,17 +36,24 @@ export const Marks = ({
         x={0}
         y={yScale(yValue(d))}
         height={yScale.bandwidth()}
+        fill={
+          selected && selected !== colorDataMap.get(colorValue(d))
+            ? "#ccc"
+            : colorScale(colorDataMap.get(colorValue(d)))
+        }
       >
-        <title fill="black">{yValue(d)}</title>
+        <title fill="black">
+          {yValue(d) + "\n\nPublication Year: " + pubYearValue(d)}
+        </title>
       </rect>
       <text
-        x={xScale(xValue(d)) - xValue(d).toString().length * 2}
-        y={yScale(yValue(d)) + yScale.bandwidth() / 2 + 5}
+        x={xScale(xValue(d)) - xValue(d).toString().length * 2 + 3}
+        y={yScale(yValue(d)) + yScale.bandwidth() / 2 + 2}
         fill="white"
         textAnchor="end"
         alignmentBaseline="middle"
       >
-        {xValue(d)}
+        {d3Format(xValue(d))}
       </text>
     </g>
   ));

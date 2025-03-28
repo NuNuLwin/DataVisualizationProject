@@ -6,24 +6,22 @@ import {
   format as d3Format,
   hierarchy,
   interpolate,
-  interpolateRainbow,
   partition,
-  quantize,
   select as d3Select,
   scaleOrdinal,
   schemeTableau10,
-  select,
 } from "d3";
 
 /* components */
 import { useData } from "./useData";
+import { Loading } from "../Loading";
 
 /* css */
 import "./SunburstChart.css";
 
-const RADIUS_DIVIDER = 14.5;
-const VIEWBOX_MIN_X = (w) => -1 * (w / 2);
-const VIEWBOX_MIN_Y = (h) => -1 * (h / 2.1);
+const RADIUS_DIVIDER = 12;
+const VIEWBOX_MIN_X = (w) => -1 * (w / 2.5);
+const VIEWBOX_MIN_Y = (h) => -1 * (h / 2.3);
 const DEFAULT_MAIN_TITLE = "Physical Sciences";
 const TEXT_WRAP_COUNT = (18 / RADIUS_DIVIDER) * 10;
 
@@ -352,7 +350,7 @@ export const SunburstChart = ({
         height,
       }}
     >
-      {loading && <pre>Loading...</pre>}
+      {loading && <Loading />}
       <svg
         viewBox={`${VIEWBOX_MIN_X(width)}, ${VIEWBOX_MIN_Y(
           height

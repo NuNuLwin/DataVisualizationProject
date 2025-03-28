@@ -5,3 +5,19 @@
   justify-content: center;
   padding: 2em 0em 2em 0em;
 }
+
+.domain-selector-sunburst {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 10px;
+}
+
+.domain-selector {
+  margin-top: 15%;
+  display: fixed;
+}
+
+.domain-selector h4 {
+  text-align: center;
+}

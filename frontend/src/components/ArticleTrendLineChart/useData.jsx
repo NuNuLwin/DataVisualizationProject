@@ -32,7 +32,7 @@ export const useData = (selectedField, perPage = 10) => {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           const result = await response.json();
-          console.log("result..", result);
+          // console.log("result..", result);
 
           // Remove HTML tags and format text
           const cleanedResults = [];
@@ -40,7 +40,7 @@ export const useData = (selectedField, perPage = 10) => {
             r.counts_by_year.map((cby) => {
               let articleName = r.display_name || "Untitled";
               if (r.publication_year) {
-                articleName += `(${r.publication_year})`;
+                articleName += ` (${r.publication_year})`;
               }
               let obj = {
                 name: articleName.replace(/<\/?[^>]+(>|$)/g, " "),

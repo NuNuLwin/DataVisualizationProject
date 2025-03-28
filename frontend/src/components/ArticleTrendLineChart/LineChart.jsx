@@ -3,14 +3,8 @@ import { useState, useRef, useEffect } from "react";
 /* d3 */
 import {
   extent,
-  format,
   scaleLinear,
-  scaleTime,
   timeFormat,
-  rollup,
-  group,
-  interpolateYlOrRd,
-  scaleSequential,
   scaleOrdinal,
   schemeCategory10,
   pointer,
@@ -20,6 +14,7 @@ import {
 
 /* data retrieval */
 import { useData } from "./useData";
+import { Loading } from "../Loading";
 
 /* components */
 import { AxisBottom } from "./components/AxisBottom";
@@ -62,10 +57,10 @@ export const LineChart = ({
   const svgRef = useRef();
   // Retrieving data from the github gist is separated as a Custom Hook
   const data = useData(selectedField);
-  const [selectedStatus, setSelectedValue] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
 
   if (!data) {
-    return <pre>Loading...</pre>;
+    return <Loading marginLeft={0} marginTop={1} />;
   }
 
   /* Constants */
@@ -130,7 +125,7 @@ export const LineChart = ({
 
   /* functions */
   function pointerEntered(event, key) {
-    console.log("Pointer Entered:", event);
+    // console.log("Pointer Entered:", event);
     select(svgRef.current)
       .selectAll("path.marks-path")
       .style("mix-blend-mode", null)
@@ -140,10 +135,10 @@ export const LineChart = ({
 
   function pointerMove(event, key) {
     const [xm, ym] = pointer(event);
-    console.log("=== event ");
-    console.log("=== pointer key ===", key);
-    console.log("=== pointer move ===", dataMap.get(key));
-    console.log("=== pointer move new ===", xm, ym);
+    // console.log("=== event ");
+    // console.log("=== pointer key ===", key);
+    // console.log("=== pointer move ===", dataMap.get(key));
+    // console.log("=== pointer move new ===", xm, ym);
     const i = leastIndex(dataMap.get(key), (obj) =>
       Math.hypot(xScale(xValue(obj)) - xm, yScale(yValue(obj)) - ym)
     );
@@ -161,7 +156,7 @@ export const LineChart = ({
   }
 
   function pointerLeave(event, key) {
-    console.log("Pointer Leave:", event);
+    // console.log("Pointer Leave:", event);
     select(svgRef.current)
       .selectAll("path.marks-path")
       .style("mix-blend-mode", "multiply")
@@ -224,7 +219,7 @@ export const LineChart = ({
               tickSize={circleRadius}
               tickTextOffset={15}
               circleRadius={circleRadius}
-              onHover={setSelectedValue}
+              onSelect={setSelectedStatus}
               selected={selectedStatus}
               fadeOpacity={fadeOpacity}
             />
