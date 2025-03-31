@@ -46,7 +46,7 @@ const xAxisLabel = "Year";
 const yValue = (d) => d.cited_by_count;
 const yAxisLabel = "Citation Count";
 
-const colorLegendLabel = "OA Status";
+const colorLegendLabel = "Open Access";
 
 export const LineChart = ({
   width = window.innerWidth,
@@ -119,9 +119,9 @@ export const LineChart = ({
     });
   }
 
-  const colorScale = scaleOrdinal(schemeCategory10).domain(
-    Array.from(oaStatusMap.keys())
-  );
+  const colorScale = scaleOrdinal()
+    .domain(["diamond", "gold", "green", "hybrid", "bronze", "closed"])
+    .range(["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#A6611A", "#FF0000"]);
 
   /* functions */
   function pointerEntered(event, key) {
@@ -210,7 +210,7 @@ export const LineChart = ({
               innerHeight - innerHeight / 1.5
             })`}
           >
-            <text x={35} y={-25} className="axis-label" textAnchor="middle">
+            <text x={50} y={-20} className="axis-label" textAnchor="middle">
               {colorLegendLabel}
             </text>
             <ColorLegend
