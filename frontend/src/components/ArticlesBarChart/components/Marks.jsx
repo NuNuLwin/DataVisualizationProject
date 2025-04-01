@@ -48,7 +48,7 @@ export const Marks = ({
       </rect>
       <text
         x={xScale(xValue(d)) - xValue(d).toString().length * 2 + 3}
-        y={yScale(yValue(d)) + yScale.bandwidth() / 2 + 2}
+        y={yScale(yValue(d)) + yScale.bandwidth() / 2 + 4}
         fill="white"
         textAnchor="end"
         alignmentBaseline="middle"
