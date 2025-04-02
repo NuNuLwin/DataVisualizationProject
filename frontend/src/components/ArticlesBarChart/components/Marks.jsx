@@ -12,8 +12,9 @@ export const Marks = ({
   colorScale,
   colorDataMap,
   colorValue,
-  pubYearValue,
   selected,
+  tooltipRef,
+  toolTipText,
 }) => {
   const rectRefs = useRef([]);
 
@@ -29,7 +30,19 @@ export const Marks = ({
   }, [data, xScale, xValue]);
 
   return data.map((d, i) => (
-    <g key={yValue(d)}>
+    <g
+      key={yValue(d)}
+      className="mark"
+      onMouseOver={(e) => {
+        const string = toolTipText(d);
+        select(tooltipRef.current)
+          .style("display", "block")
+          .html(string)
+          .style("left", e.pageX + 10 + "px")
+          .style("top", e.pageY - 10 + "px");
+      }}
+      onMouseOut={() => select(tooltipRef.current).style("display", "none")}
+    >
       <rect
         className="mark"
         ref={(el) => (rectRefs.current[i] = el)}
@@ -42,9 +55,15 @@ export const Marks = ({
             : colorScale(colorDataMap.get(colorValue(d)))
         }
       >
-        <title fill="black">
-          {yValue(d) + "\n\nPublication Year: " + pubYearValue(d)}
-        </title>
+        {/* <title fill="red" className="tooltip-text">
+          {yValue(d) +
+            "\n\nPublication Year: " +
+            pubYearValue(d) +
+            "\n\nAuthors: " +
+            authorValue(d) +
+            "\n\nInstitutions: " +
+            institutionValue(d)}
+        </title> */}
       </rect>
       <text
         x={xScale(xValue(d)) - xValue(d).toString().length * 2 + 3}

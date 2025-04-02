@@ -6,20 +6,19 @@
   fill: #635f5d;
 }
 
-.citation-chart .mark {
-  /* fill: #137b80; */
-}
-
 .citation-chart .axis-label {
   font-size: 2em;
   fill: #635f5d;
 }
 
-.citation-chart .tooltip {
-  width: 50px;
-  height: 30px;
-  background-color: #635f5d;
+.citation-chart .my-tooltip {
   position: absolute;
-  text-align: center;
+  background-color: #333;
+  color: white;
+  padding: 5px;
   border-radius: 5px;
+  display: none;
+  max-width: 500px;
+  z-index: 10;
+  font-size: 14px;
 }

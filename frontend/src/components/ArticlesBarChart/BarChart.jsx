@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 /* d3 */
 import {
@@ -43,6 +43,7 @@ export const BarChart = ({
 }) => {
   const [perPage, setPerPage] = useState(10);
   const [selectedType, setSelectedType] = useState(null);
+  const tooltipRef = useRef();
 
   let data = useData(selectedTopic, perPage);
 
@@ -54,7 +55,7 @@ export const BarChart = ({
     return <Loading />;
   }
 
-  console.log("Bar Chart Data ==>", data);
+  // console.log("Bar Chart Data ==>", data);
 
   /* Constants */
   const siFormat = format(".2s");
@@ -63,22 +64,67 @@ export const BarChart = ({
   const innerHeight = height - margin.top - margin.bottom;
   const innerWidth = width - margin.left - margin.right;
   // console.log("=== Topic Data ===", data);
+
+  /* Value Selectors */
   const xValue = (d) => d.cited_by_count;
-  const xScale = scaleLinear() // Ideal for measurement
-    .domain([0, max(data, xValue)]) // Zero to Max of Citation value
-    .range([0, innerWidth]); // Length of X axis
+  const xScale = scaleLinear()
+    .domain([0, max(data, xValue)])
+    .range([0, innerWidth]);
 
   const yValue = (d) => `${d.display_name}-${d.cited_by_count}`;
-  const yScale = scaleBand() // Ideal for ordinal or categorical dimension
-    .domain(data.map(yValue)) // To point which value to use as Y axis
-    .range([0, innerHeight]) // Length of Y axis
-    .paddingInner(0.2); // Padding between each bar
+  const yScale = scaleBand()
+    .domain(data.map(yValue))
+    .range([0, innerHeight])
+    .paddingInner(0.2);
 
   const colorValue = (d) => d.display_name;
+  const pubYearValue = (d) => d.publication_year;
+  const authorValue = (d) => {
+    let authors = [];
+    d.authorships.forEach((obj) => {
+      authors.push(obj?.author?.display_name || obj?.raw_author_name);
+    });
+    return authors.length > 20
+      ? authors.slice(0, 20).join(", ") + ", and more"
+      : authors.length > 0
+      ? authors.join(", ")
+      : "";
+  };
+  const institutionValue = (d) => {
+    let institutions = new Map();
+    d.authorships.forEach((author_obj) => {
+      author_obj.institutions.forEach((obj) => {
+        if (!institutions.get(obj.display_name)) {
+          institutions.set(obj.display_name, 1);
+        }
+      });
+    });
+    institutions = Array.from(institutions.keys());
+    return institutions.length > 20
+      ? institutions.slice(0, 20).join(", ") + " and more"
+      : institutions.length > 0
+      ? institutions.join(", ")
+      : "";
+  };
+
+  /* Tooltip Text */
+  const toolTipText = (d) => {
+    return (
+      "<p>" +
+      yValue(d) +
+      "<br><br>Publication Year: " +
+      pubYearValue(d) +
+      "<br><br>Authors: " +
+      authorValue(d) +
+      "<br><br>Institutions: " +
+      institutionValue(d) +
+      "</p>"
+    );
+  };
+
+  /* Data Maps */
   const colorMap = new Map();
   const colorDataMap = new Map();
-  const pubYearValue = (d) => d.publication_year;
-
   data.map((d) => {
     if (!colorMap.has(d.type)) {
       colorMap.set(d.type, "");
@@ -93,7 +139,7 @@ export const BarChart = ({
   );
 
   return (
-    <div className="citation-chart">
+    <div className="citation-chart" id="citation-chart">
       <center>
         <label htmlFor="perPage">Works: </label>
         <select id="perPage" value={perPage} onChange={handlePerPageChange}>
@@ -149,11 +195,14 @@ export const BarChart = ({
             colorScale={colorScale}
             colorDataMap={colorDataMap}
             colorValue={colorValue}
-            pubYearValue={pubYearValue}
             selected={selectedType}
+            toolTipText={toolTipText}
+            tooltipRef={tooltipRef}
           />
         </g>
       </svg>
+
+      <div className="my-tooltip" ref={tooltipRef}></div>
     </div>
   );
 };

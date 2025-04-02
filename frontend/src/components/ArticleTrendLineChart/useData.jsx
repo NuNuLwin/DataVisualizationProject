@@ -43,6 +43,7 @@ export const useData = (selectedField, perPage = 10) => {
                 articleName += ` (${r.publication_year})`;
               }
               let obj = {
+                ...r,
                 name: articleName.replace(/<\/?[^>]+(>|$)/g, " "),
                 year: cby.year,
                 cited_by_count: cby.cited_by_count,

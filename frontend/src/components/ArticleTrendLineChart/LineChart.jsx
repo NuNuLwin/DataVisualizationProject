@@ -55,6 +55,8 @@ export const LineChart = ({
 }) => {
   const pointerRef = useRef();
   const svgRef = useRef();
+  const tooltipRef = useRef();
+
   // Retrieving data from the github gist is separated as a Custom Hook
   const data = useData(selectedField);
   const [selectedStatus, setSelectedStatus] = useState(null);
@@ -76,6 +78,50 @@ export const LineChart = ({
     .domain(extent(data, yValue))
     .range([innerHeight, 0])
     .nice();
+
+  const pubYearValue = (d) => d.publication_year;
+  const authorValue = (d) => {
+    let authors = [];
+    d.authorships.forEach((obj) => {
+      authors.push(obj?.author?.display_name || obj?.raw_author_name);
+    });
+    return authors.length > 20
+      ? authors.slice(0, 20).join(", ") + ", and more"
+      : authors.length > 0
+      ? authors.join(", ")
+      : "";
+  };
+  const institutionValue = (d) => {
+    let institutions = new Map();
+    d.authorships.forEach((author_obj) => {
+      author_obj.institutions.forEach((obj) => {
+        if (!institutions.get(obj.display_name)) {
+          institutions.set(obj.display_name, 1);
+        }
+      });
+    });
+    institutions = Array.from(institutions.keys());
+    return institutions.length > 20
+      ? institutions.slice(0, 20).join(", ") + " and more"
+      : institutions.length > 0
+      ? institutions.join(", ")
+      : "";
+  };
+
+  /* Tooltip Text */
+  const toolTipText = (d) => {
+    return (
+      "<p>" +
+      labelValue(d) +
+      "<br><br>Publication Year: " +
+      pubYearValue(d) +
+      "<br><br>Authors: " +
+      authorValue(d) +
+      "<br><br>Institutions: " +
+      institutionValue(d) +
+      "</p>"
+    );
+  };
 
   const dataMap = new Map(); // { article name : [ objects ]}
   const oaStatusMap = new Map(); // { oa status : [ article name ]}
@@ -130,7 +176,7 @@ export const LineChart = ({
       .selectAll("path.marks-path")
       .style("mix-blend-mode", null)
       .style("opacity", 0);
-    select(pointerRef.current).attr("display", null);
+    select(tooltipRef.current).style("display", "none");
   }
 
   function pointerMove(event, key) {
@@ -148,21 +194,27 @@ export const LineChart = ({
       .style("opacity", 1)
       .style("stroke", colorScale(oaStatusDataMap.get(key)))
       .raise();
-    select(pointerRef.current).attr(
-      "transform",
-      `translate(${xScale(xValue(obj))},${yScale(yValue(obj))})`
-    );
-    select(pointerRef.current).select("text").text(labelValue(obj));
+    // select(pointerRef.current).attr(
+    //   "transform",
+    //   `translate(${xScale(xValue(obj))},${yScale(yValue(obj))})`
+    // );
+    // select(pointerRef.current).select("text").text(labelValue(obj));
+    const string = toolTipText(obj);
+    select(tooltipRef.current)
+      .style("display", "block")
+      .html(string)
+      .style("left", xScale(xValue(obj)) + 10 + "px")
+      .style("top", yScale(yValue(obj)) - 40 + "px");
   }
 
   function pointerLeave(event, key) {
     // console.log("Pointer Leave:", event);
+    select(tooltipRef.current).style("display", "none");
     select(svgRef.current)
       .selectAll("path.marks-path")
       .style("mix-blend-mode", "multiply")
       .style("stroke", null)
       .style("opacity", 1);
-    select(pointerRef.current).attr("display", "none");
     select(svgRef.current).node().value = null;
     select(svgRef.current).dispatch("input", { bubbles: true });
   }
@@ -243,6 +295,8 @@ export const LineChart = ({
           ))}
         </g>
       </svg>
+
+      <div className="my-tooltip" ref={tooltipRef}></div>
     </div>
   );
 };

@@ -21,3 +21,15 @@
     font-size: 2em;
     fill: #635F5D;
 }
+
+.article-trend-wrapper .my-tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    display: none;
+    max-width: 500px;
+    font-size: 14px;
+    z-index: 10;
+  }

@@ -67,7 +67,10 @@ export const SunburstChart = ({
         arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0
       )
       .attr("pointer-events", (d) => (arcVisible(d.current) ? "auto" : "none"))
-      .attr("d", (d) => arcGenerator(d.current))
+      .attr("d", (d) => {
+        // console.log("Path Generator ==>", d);
+        return arcGenerator(d.current);
+      })
       .on("mouseover", function (event, d) {
         d3Select(this).attr("fill-opacity", 1);
         // .attr("fill", "gold"); // Optionally change the color to something brighter
@@ -133,6 +136,7 @@ export const SunburstChart = ({
       .attr("fill-opacity", (d) => +labelVisible(d.current))
       .attr("transform", (d) => labelTransform(d.current))
       .each(function (d) {
+        // console.log("labelGenerator d =>", d);
         const textEl = d3Select(this);
         const arcHeight = (d.current.y1 - d.current.y0) * radius;
         const maxLines = Math.floor(arcHeight / 12); // 12px per line
