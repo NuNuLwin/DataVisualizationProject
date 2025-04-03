@@ -22,10 +22,6 @@ export const InstitutionCollaboration = () => {
   const [yearData, setYearData] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
 
-  // const [CountryData, setCountryData] = useState([]);
-  // const [selectedCountryCode, setSelectedCountryCode] = useState("");
-  // const [selectedCountryName, setSelectedCountryName] = useState("");
-
     // New states for institution search
    // const [searchTerm, setSearchTerm] = useState("");
    const [searchInput, setSearchInput] = useState(""); // What's typed in the box
@@ -172,24 +168,6 @@ export const InstitutionCollaboration = () => {
     dispatch(getYears());
   }, [])
 
-  //  //********************** Countries ******************** //
-  //  useEffect(() => {
-  //   console.log("receive countries response ",countries.results[0]);
-  //   if(countries.results.length>0){
-  //     // add to country data
-  //     setCountryData(countries.results.map((c) => ({ code: c.country_code, name: c.display_name })));
-
-  //     // set default selected coutry
-  //     setSelectedCountryCode(countries.results[0].country_code);
-  //     setSelectedCountryName(countries.results[0].display_name)
-  //   }
-  // }, [countries]);
-
-  // useEffect(() => {
-  //   console.log("retrieve concepts");
-  //   dispatch(getCountries());
-  // }, [])
-
    // ****** Function to search institutions
    const searchInstitutions = async () => {
     if (!searchInput.trim()) {
@@ -262,7 +240,8 @@ export const InstitutionCollaboration = () => {
 
 
   return (
-    <div className="container">
+    // <div className="container">
+      <div className="card institution-wrapper">
       <h3>Chord Diagram of Institutional Collaborations (≥2 Joint Publications)</h3>
       {/*  Research Collaboration Network: Institutions with 2+ Shared Publications*/}
       <div className="filters">
@@ -306,26 +285,7 @@ export const InstitutionCollaboration = () => {
 
       </div>
 
-      {/* <div className="filters">
-        <label className="filter-label">
-            Filter by Country:
-            <select
-            className="filter-select"
-              value={selectedCountryCode}
-              onChange={(e) =>{ 
-                setSelectedCountryCode(e.target.value)
-              }}
-            >
-              {CountryData.map((country) => (
-                <option key={country.country_code} value={country.country_code}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-          </label>
-      </div> */}
-
- {/* New Search and Selection Section */}
+      {/* New Search and Selection Section */}
       <div className="search-section">
         <h4>Search Institutions</h4>
         <div className="search-input-container">
@@ -379,39 +339,6 @@ export const InstitutionCollaboration = () => {
             </ul>
           </div>
         )}
-        
-        {/* {selectedInstitution && (
-          <div className="selected-institution">
-            <h5>Currently Selected:</h5>
-            <div className="institution-card">
-              <h4>{selectedInstitution.display_name}</h4>
-              <p>ID: {selectedInstitution.id.split('/').pop()}</p>
-              {selectedInstitution.country_code && <p>Country: {selectedInstitution.country_code}</p>}
-              {selectedInstitution.works_count && <p>Works: {selectedInstitution.works_count.toLocaleString()}</p>}
-            </div>
-          </div>
-        )}
-        
-        {selectedInstitutionsList.length > 0 && (
-          <div className="selected-list">
-            <h5>Selected Institutions:</h5>
-            <ul>
-              {selectedInstitutionsList.map(institution => (
-                <li key={institution.id}>
-                  <div className="selected-item">
-                    <span>{institution.display_name}</span>
-                    <button 
-                      onClick={() => handleRemoveInstitution(institution.id)}
-                      className="remove-button"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )} */}
       </div>
 
 

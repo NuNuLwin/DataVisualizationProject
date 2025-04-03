@@ -179,7 +179,7 @@ import "../index.css"
 
 
   return (
-    <div className="container">
+    <div className="card coauthor-wrapper">
       <h3>Co-Authorship Network</h3>
       <div className="filters">
         <label className="filter-label">
