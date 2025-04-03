@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 
-export const useData = (selectedField, perPage = 10) => {
+export const useData = (
+  selectedField,
+  selectedAuthor = null,
+  selectedInstitution = null,
+  perPage = 10
+) => {
   const [data, setData] = useState(null);
+  const [allAuthors, setAllAuthors] = useState([]);
+  const [allInstitutions, setAllInstitutions] = useState([]);
 
   const formatText = (text) => {
     if (!text) return text;
@@ -18,13 +25,31 @@ export const useData = (selectedField, perPage = 10) => {
     return text;
   };
 
+  // https://api.openalex.org/works?filter=authorships.author.id%3Aa5000387389,primary_topic.field.id%3A20
   useEffect(() => {
     // Fetch data only if a topic is selected
     if (selectedField?.id) {
+      console.log(" selectedField.id..", selectedField.id);
       const fetchData = async () => {
-        const url = `https://api.openalex.org/works?filter=primary_topic.field.id:${encodeURIComponent(
+        // const url = `https://api.openalex.org/works?filter=primary_topic.field.id:${encodeURIComponent(
+        //   selectedField.id
+        // )}&sort=cited_by_count:desc&per_page=${perPage}`;
+
+        let url = `https://api.openalex.org/works?filter=primary_topic.field.id:${encodeURIComponent(
           selectedField.id
-        )}&sort=cited_by_count:desc&per_page=${perPage}`;
+        )}`;
+
+        if (selectedAuthor) {
+          url += `,authorships.author.id:${selectedAuthor.split("/").pop()}`;
+        }
+
+        if (selectedInstitution) {
+          url += `,authorships.institutions.id:${selectedInstitution
+            .split("/")
+            .pop()}`;
+        }
+
+        url += `&sort=cited_by_count:desc&per_page=${perPage}`;
 
         try {
           const response = await fetch(url);
@@ -33,6 +58,47 @@ export const useData = (selectedField, perPage = 10) => {
           }
           const result = await response.json();
           // console.log("result..", result);
+
+          // Extract unique authors from the results
+          if (selectedAuthor === null) {
+            const authorsMap = new Map();
+            result.results.forEach((work) => {
+              work.authorships.forEach((authorship) => {
+                if (authorship.author) {
+                  const authorId = authorship.author.id.split("/").pop();
+                  if (!authorsMap.has(authorId)) {
+                    authorsMap.set(authorId, {
+                      id: authorId,
+                      display_name: authorship.author.display_name,
+                    });
+                  }
+                }
+              });
+            });
+
+            setAllAuthors(Array.from(authorsMap.values()));
+          }
+
+          // Extract unique institutions from the results
+          if (selectedInstitution === null) {
+            const institutionMap = new Map();
+            result.results.forEach((work) => {
+              work.authorships.forEach((authorship) => {
+                authorship.institutions.forEach((institution) => {
+                  const institutionId = institution.id.split("/").pop();
+                  if (!institutionMap.has(institutionId)) {
+                    institutionMap.set(institutionId, {
+                      id: institutionId,
+                      display_name: institution.display_name,
+                      country_code: institution.country_code,
+                    });
+                  }
+                });
+              });
+            });
+
+            setAllInstitutions(Array.from(institutionMap.values()));
+          }
 
           // Remove HTML tags and format text
           const cleanedResults = [];
@@ -64,7 +130,7 @@ export const useData = (selectedField, perPage = 10) => {
     } else {
       setData([]);
     }
-  }, [selectedField, perPage]);
+  }, [selectedField, selectedAuthor, selectedInstitution, perPage]);
 
-  return data;
+  return { data, allAuthors, allInstitutions };
 };

@@ -12,7 +12,7 @@
 
 .article-trend-line-chart .marks path {
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
@@ -45,4 +45,21 @@
 
 .legend-item:hover text {
   font-weight: bold;
+}
+.author-filter {
+  margin: 20px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.author-filter label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.author-filter select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-width: 300px;
 }

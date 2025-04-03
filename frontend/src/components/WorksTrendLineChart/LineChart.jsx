@@ -48,6 +48,9 @@ const yAxisLabel = "Citation Count";
 
 const colorLegendLabel = "Open Access";
 
+const tooltipTopPadding = 65;
+const tooltipLeftPadding = 10;
+
 export const LineChart = ({
   width = window.innerWidth,
   height = window.innerHeight,
@@ -57,9 +60,16 @@ export const LineChart = ({
   const svgRef = useRef();
   const tooltipRef = useRef();
 
-  // Retrieving data from the github gist is separated as a Custom Hook
-  const data = useData(selectedField);
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [selectedInstitution, setSelectedInstitution] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
+
+  // Retrieving data from the github gist is separated as a Custom Hook
+  const { data, allAuthors, allInstitutions } = useData(
+    selectedField,
+    selectedAuthor,
+    selectedInstitution
+  );
 
   if (!data) {
     return <Loading marginLeft={0} marginTop={1} />;
@@ -203,8 +213,8 @@ export const LineChart = ({
     select(tooltipRef.current)
       .style("display", "block")
       .html(string)
-      .style("left", xScale(xValue(obj)) + 10 + "px")
-      .style("top", yScale(yValue(obj)) - 40 + "px");
+      .style("left", xScale(xValue(obj)) + tooltipLeftPadding + "px")
+      .style("top", yScale(yValue(obj)) + tooltipTopPadding + "px");
   }
 
   function pointerLeave(event, key) {
@@ -221,6 +231,46 @@ export const LineChart = ({
 
   return (
     <div>
+      {/* Author dropdown */}
+      <div className="row" style={{ width: "100%" }}>
+        <div className="col-md-2">&nbsp;</div>
+        <div className="col-md-4">
+          <div className="author-filter">
+            <label htmlFor="author-select">Author:</label>
+            <select
+              id="author-select"
+              value={selectedAuthor || ""}
+              onChange={(e) => setSelectedAuthor(e.target.value || null)}
+            >
+              <option value="">All Authors</option>
+              {allAuthors.map((author) => (
+                <option key={author.id} value={author.id}>
+                  {author.display_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="author-filter">
+            <label htmlFor="author-select">Institution:</label>
+            <select
+              id="author-select"
+              value={selectedInstitution || ""}
+              onChange={(e) => setSelectedInstitution(e.target.value || null)}
+            >
+              <option value="">All Institutions</option>
+              {allInstitutions.map((institution) => (
+                <option key={institution.id} value={institution.id}>
+                  {institution.display_name} - {institution.country_code}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="col-md-2">&nbsp;</div>
+      </div>
+
       <svg
         width={width}
         height={height}
@@ -262,12 +312,7 @@ export const LineChart = ({
               innerHeight - innerHeight / 1.5
             })`}
           >
-            <text
-              x={50}
-              y={-20}
-              className="axis-label clickable"
-              textAnchor="middle"
-            >
+            <text x={50} y={-20} className="axis-label" textAnchor="middle">
               {colorLegendLabel}
             </text>
             <ColorLegend
