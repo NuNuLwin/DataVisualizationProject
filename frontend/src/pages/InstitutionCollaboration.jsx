@@ -11,7 +11,7 @@ import { FaTimes } from "react-icons/fa";
 import { processWorks,prepareChordData,getCountryName } from "../utils/utils";
 
 
-const InstitutionCollaboration = () => {
+export const InstitutionCollaboration = () => {
   const dispatch = useDispatch();
   const { works,concepts,years, countries, isLoading,isSuccess,isError,message } = useSelector((state) => state.institution);
 
@@ -267,7 +267,7 @@ const InstitutionCollaboration = () => {
       {/*  Research Collaboration Network: Institutions with 2+ Shared Publications*/}
       <div className="filters">
         <label className="filter-label">
-          Field:
+          Filter by Field:
           <select
            className="filter-select"
             value={selectedConcept}
@@ -286,7 +286,7 @@ const InstitutionCollaboration = () => {
           </select>
         </label>
         <label className="filter-label">
-          Publication Year:
+          Filter by Publication Year:
           <select
            className="filter-select"
             value={selectedYear}
@@ -439,4 +439,4 @@ const InstitutionCollaboration = () => {
   );
 };
 
-export default InstitutionCollaboration;
+// export default InstitutionCollaboration;

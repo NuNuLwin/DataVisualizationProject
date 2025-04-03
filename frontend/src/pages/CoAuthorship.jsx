@@ -8,7 +8,7 @@ import axios from 'axios'
 import { FaTimes } from "react-icons/fa"; 
 import "../index.css"
 
- const CoAuthorship = () => {
+ export const CoAuthorship = () => {
 
   const dispatch = useDispatch();
   const { coauthors,concepts,years, isLoadingCoAuthor,isSuccessCoAuthor,isErrorCoAuthor,messageCoAuthor } = useSelector((state) => state.institution);
@@ -183,7 +183,7 @@ import "../index.css"
       <h3>Co-Authorship Network</h3>
       <div className="filters">
         <label className="filter-label">
-          Filter by Concept:
+          Filter by Field:
           <select
            className="filter-select"
             value={selectedConcept}
@@ -308,4 +308,4 @@ import "../index.css"
   );
 
 }
-export default CoAuthorship;
+// export default CoAuthorship;
