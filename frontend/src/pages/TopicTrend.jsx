@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { BarChart } from "../components/ArticlesBarChart/BarChart";
+import { BarChart } from "../components/WorksBarChart/BarChart";
 import { SunburstChart } from "../components/TopicSunburst/SunburstChart";
 import "./TopicTrend.css";
 

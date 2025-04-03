@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 /* components */
-import { LineChart } from "../components/ArticleTrendLineChart/LineChart";
+import { LineChart } from "../components/WorksTrendLineChart/LineChart";
 import { Loading } from "../components/Loading";
 /* css */
 import "./ArticleTrend.css";
