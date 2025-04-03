@@ -167,7 +167,7 @@ export const LineChart = ({
 
   const colorScale = scaleOrdinal()
     .domain(["diamond", "gold", "green", "hybrid", "bronze", "closed"])
-    .range(["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#A6611A", "#FF0000"]);
+    .range(["#377eb8", "#999999", "#4daf4a", "#984ea3", "#ff7f00", "#e41a1c"]);
 
   /* functions */
   function pointerEntered(event, key) {
@@ -262,7 +262,12 @@ export const LineChart = ({
               innerHeight - innerHeight / 1.5
             })`}
           >
-            <text x={50} y={-20} className="axis-label" textAnchor="middle">
+            <text
+              x={50}
+              y={-20}
+              className="axis-label clickable"
+              textAnchor="middle"
+            >
               {colorLegendLabel}
             </text>
             <ColorLegend
@@ -277,8 +282,9 @@ export const LineChart = ({
             />
           </g>
 
-          {dataMap.keys().map((k) => (
+          {Array.from(dataMap.keys()).map((k) => (
             <Marks
+              key={k}
               data={dataMap.get(k)}
               xScale={xScale}
               yScale={yScale}

@@ -1,35 +1,48 @@
 .article-trend-line-chart .tick line {
-    stroke: #dde;
+  stroke: #dde;
 }
 
 .article-trend-line-chart .tick text {
-    fill: #635F5D;
+  fill: #635f5d;
 }
 
 .article-trend-line-chart .marks circle {
-    /* fill: #137B80; */
+  /* fill: #137B80; */
 }
 
 .article-trend-line-chart .marks path {
-    fill: none;
-    stroke-width: 2;
-    stroke-linejoin: round;
-    stroke-linecap: round;
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .article-trend-line-chart .axis-label {
-    font-size: 2em;
-    fill: #635F5D;
+  font-size: 2em;
+  fill: #635f5d;
 }
 
 .article-trend-wrapper .my-tooltip {
-    position: absolute;
-    background-color: #333;
-    color: white;
-    padding: 5px;
-    border-radius: 5px;
-    display: none;
-    max-width: 500px;
-    font-size: 14px;
-    z-index: 10;
-  }
+  position: absolute;
+  background-color: #333;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  display: none;
+  max-width: 500px;
+  font-size: 14px;
+  z-index: 10;
+}
+
+.legend-item {
+  cursor: pointer;
+}
+
+.legend-item:hover circle {
+  stroke: #333;
+  stroke-width: 1.5;
+}
+
+.legend-item:hover text {
+  font-weight: bold;
+}

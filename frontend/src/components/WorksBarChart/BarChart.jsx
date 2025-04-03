@@ -43,7 +43,6 @@ export const BarChart = ({
 }) => {
   const [perPage, setPerPage] = useState(10);
   const [selectedType, setSelectedType] = useState(null);
-  const [selectedAuthor, setSelectedAuthor] = useState(null);
   const tooltipRef = useRef();
 
   let data = useData(selectedTopic, perPage);
