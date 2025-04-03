@@ -25,6 +25,12 @@ export const useData = (
     return text;
   };
 
+  const sortByName = (items) => {
+    return [...items].sort((a, b) =>
+      (a.display_name || "").localeCompare(b.display_name || "")
+    );
+  };
+
   // https://api.openalex.org/works?filter=authorships.author.id%3Aa5000387389,primary_topic.field.id%3A20
   useEffect(() => {
     // Fetch data only if a topic is selected
@@ -63,7 +69,7 @@ export const useData = (
           if (selectedAuthor === null) {
             const authorsMap = new Map();
             result.results.forEach((work) => {
-              work.authorships.forEach((authorship) => {
+              work.authorships?.forEach((authorship) => {
                 if (authorship.author) {
                   const authorId = authorship.author.id.split("/").pop();
                   if (!authorsMap.has(authorId)) {
@@ -76,15 +82,16 @@ export const useData = (
               });
             });
 
-            setAllAuthors(Array.from(authorsMap.values()));
+            // Sort authors alphabetically before setting state
+            setAllAuthors(sortByName(Array.from(authorsMap.values())));
           }
 
           // Extract unique institutions from the results
           if (selectedInstitution === null) {
             const institutionMap = new Map();
             result.results.forEach((work) => {
-              work.authorships.forEach((authorship) => {
-                authorship.institutions.forEach((institution) => {
+              work.authorships?.forEach((authorship) => {
+                authorship.institutions?.forEach((institution) => {
                   const institutionId = institution.id.split("/").pop();
                   if (!institutionMap.has(institutionId)) {
                     institutionMap.set(institutionId, {
@@ -97,7 +104,8 @@ export const useData = (
               });
             });
 
-            setAllInstitutions(Array.from(institutionMap.values()));
+            // Sort inst alphabetically before setting state
+            setAllInstitutions(sortByName(Array.from(institutionMap.values())));
           }
 
           // Remove HTML tags and format text
