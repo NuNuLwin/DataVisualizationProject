@@ -8,19 +8,29 @@ const initialState = {
     years:{
         group_by:[]
     },
+    countries:{
+        results:[]
+    },
     works:{
+        results:[]
+    },
+    coauthors:{
         results:[]
     },
     isError: false,
     isSuccess: false,
     isLoading: false,
-    message: ''
+    message: '',
+    isErrorCoAuthor: false,
+    isSuccessCoAuthor: false,
+    isLoadingCoAuthor: false,
+    messageCoAuthor: ''
 }
 
-export const getInstitutionCollaboration = createAsyncThunk('institutionCollaboration/getInstitutionCollaboration',async ({conceptId,year},thunkAPI) =>{
-    console.log("institutionSlice conceptId ",conceptId+" year "+year);
+export const getInstitutionCollaboration = createAsyncThunk('institutionCollaboration/getInstitutionCollaboration',async ({conceptId,year,institutionId},thunkAPI) =>{
+    console.log("institutionSlice conceptId ",conceptId+" year "+year+" institutionId "+institutionId);
     try {
-        return await institutionService.getInstitutionCollaboration(conceptId,year)
+        return await institutionService.getInstitutionCollaboration(conceptId,year,institutionId)
     } catch (error) {
         const message = error?.response?.data?.message || "";
       return thunkAPI.rejectWithValue(message)
@@ -47,6 +57,41 @@ export const getYears = createAsyncThunk('institutionCollaboration/getYears',asy
     }
 })
 
+export const getCoAuthorship = createAsyncThunk('institutionCollaboration/getCoAuthorship',async ({conceptId,institutionId,year},thunkAPI) =>{
+    console.log("");
+    try {
+          // Create an array of promises for 3 pages
+        const pagePromises = [
+            institutionService.getCoAuthorship(conceptId,institutionId,year, 1),
+            institutionService.getCoAuthorship(conceptId,institutionId,year, 2),
+           // institutionService.getCoAuthorship(conceptId, 3)
+        ];
+
+         // Wait for all requests to complete
+        const results = await Promise.all(pagePromises);
+        // Combine all results
+        const combinedData = {
+            results: results.flatMap(result => result.results),
+            meta: results[0].meta // Take meta from first page
+        };
+        return combinedData;
+       // return await institutionService.getCoAuthorship(conceptId)
+    } catch (error) {
+        const message = error?.response?.data?.message || "";
+      return thunkAPI.rejectWithValue(message)
+    }
+})
+
+export const getCountries = createAsyncThunk('institutionCollaboration/getCountries',async (thunkAPI) =>{
+    console.log("");
+    try {
+        return await institutionService.getCountries()
+    } catch (error) {
+        const message = error?.response?.data?.message || "";
+      return thunkAPI.rejectWithValue(message)
+    }
+})
+
 export const institutionSlice = createSlice({
     name: 'institution',
     initialState,
@@ -55,6 +100,9 @@ export const institutionSlice = createSlice({
     },
     extraReducers: (builder) =>{
         builder
+        .addCase(getCountries.fulfilled,(state,action) => {
+            state.countries = action.payload
+        })
         .addCase(getYears.fulfilled,(state,action) => {
             state.years = action.payload
         })
@@ -73,6 +121,19 @@ export const institutionSlice = createSlice({
             state.isLoading = false
             state.isError = true
             state.message = action.payload
+        })
+        .addCase(getCoAuthorship.pending, (state) =>{
+            state.isLoadingCoAuthor = true
+        })
+        .addCase(getCoAuthorship.fulfilled,(state,action) => {
+            state.isLoadingCoAuthor = false
+            state.isSuccessCoAuthor = true
+            state.coauthors = action.payload
+        })
+        .addCase(getCoAuthorship.rejected,(state,action) => {
+            state.isLoadingCoAuthor = false
+            state.isErrorCoAuthor = true
+            state.messageCoAuthor = action.payload
         })
     }
 })

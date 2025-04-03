@@ -47,7 +47,7 @@ export const processWorks = (works) => {
     const filteredCollaborationCounts = Object.entries(collaborationCounts)
     .filter(([_, count]) => count > 2)           // Keep only pairs with count > 2
     .sort((a, b) => b[1] - a[1])                // Sort by count (highest first)
-    .slice(0, 10)                               // Take top 10
+    .slice(0, 30)                               // Take top 10
     .reduce((acc, [pair, count]) => {           // Convert back to object
         acc[pair] = count;
         return acc;
@@ -187,6 +187,234 @@ export const processWorks = (works) => {
     });
   
     return { matrix, institutionList };
+  };
+
+  // *** the sample data ********
+  // ** work 1
+  // {
+  //   authorships: [
+  //     { author: { id: "A1", display_name: "Alice" } },
+  //     { author: { id: "A2", display_name: "Bob" } }
+  //   ]
+  // }
+ // ** work 2
+//    authorships: [
+//      { author: { id: "A1", name: "Alice" } },
+//      { author: { id: "A3", name: "Charlie" } }
+//  ]
+// *** output
+// {
+//    "A1": { name: "Alice", coAuthors: Set(["A2", "A3"]) },
+//    "A2": { name: "Bob", coAuthors: Set(["A1"]) },
+//    "A3": { name: "Charlie", coAuthors: Set(["A1"]) }
+// }
+// **** final array
+// [
+//   { 
+//     id: "A1", 
+//     name: "Alice", 
+//     coAuthors: ["A2", "A3"]  // Set converted to Array
+//   },
+//   { 
+//     id: "A2", 
+//     name: "Bob", 
+//     coAuthors: ["A1"] 
+//   },
+//   { 
+//     id: "A3", 
+//     name: "Charlie", 
+//     coAuthors: ["A1"] 
+//   }
+// ]
+
+// process all authors
+// export const processCoAuthorData = (works) => {
+//   console.log("processCoAuthorData ");
+//   const authors = new Map(); // { authorId: { name, coAuthors: Set() } }
+
+//   works.forEach(work => {
+//     work.authorships.forEach(a => {// for each author, 
+//       if (!authors.has(a.author.id)) {//If the author is new, adds them to the Map. An empty Set to store their co-authors.
+//         authors.set(a.author.id, {
+//           name: a.author.display_name,
+//           coAuthors: new Set(),
+//           institutions: a.institutions?.map(i => i.display_name) || ['Unknown']
+//         });
+//       }
+//       // Add co-authors (excluding self)
+//       work.authorships// add the rest of authors to 'coAuthors' of first author
+//         .filter(x => x.author.id !== a.author.id)
+//         .forEach(x => authors.get(a.author.id).coAuthors.add(x.author.id));
+//     });
+//   });
+
+//   return Array.from(authors.entries()).map(([id, data]) => ({
+//     id,
+//     name: data.name,
+//     coAuthors: Array.from(data.coAuthors),
+//   }));
+// };
+
+// process only the top 10 authors with at least 2 publications
+// export const processCoAuthorData = (works) => {
+//   console.log("processCoAuthorData ");
+//   const authors = new Map(); // { authorId: { name, coAuthors: Set(), publicationCount: number } }
+
+//   // First pass: count publications and collect co-authors
+//   works.forEach(work => {
+//      // For works with >10 authors, we'll process only the first 10 authors
+//      const authorshipsToProcess = work.authorships.length > 14 
+//      ? work.authorships.slice(0, 14) 
+//      : work.authorships;
+
+//      authorshipsToProcess.forEach(a => {//work.authorships.forEach(a => {
+//       if (!authors.has(a.author.id)) {
+//         authors.set(a.author.id, {
+//           name: a.author.display_name,
+//           coAuthors: new Set(),
+//           publicationCount: 0,
+//           institutions: a.institutions?.map(i => i.display_name) || ['Unknown']
+//         });
+//       }
+//       // Increment publication count
+//       authors.get(a.author.id).publicationCount++;
+      
+//       // Add co-authors (excluding self)
+//       work.authorships
+//         .filter(x => x.author.id !== a.author.id)
+//         .forEach(x => authors.get(a.author.id).coAuthors.add(x.author.id));
+//     });
+//   });
+
+//   // Convert to array and filter
+//   const filteredAuthors = Array.from(authors.entries())
+//     .filter(([id, data]) => data.publicationCount >= 2 ) // At least 2 publications
+//     .sort((a, b) => b[1].publicationCount - a[1].publicationCount) // Sort by publication count
+//    // .slice(0, 10); // Take top 10
+
+//   // Now we need to filter *coAuthors to only include those in our top 10
+//   const topAuthorIds = new Set(filteredAuthors.map(([id]) => id));
+  
+//   return filteredAuthors.map(([id, data]) => ({
+//     id,
+//     name: data.name,
+//     coAuthors: Array.from(data.coAuthors).filter(coId => topAuthorIds.has(coId)),
+//     publicationCount: data.publicationCount,
+//     institutions: data.institutions
+//   }));
+// };
+export const processCoAuthorData = (works) => {
+  console.log("processCoAuthorData ");
+  const authors = new Map(); // { authorId: { name, coAuthors: Set(), publicationCount: number } }
+
+  // First pass: count publications and collect co-authors
+  works.forEach(work => {
+     // For works with >10 authors, we'll process only the first 10 authors
+     const authorshipsToProcess = work.authorships.length > 14 
+     ? work.authorships.slice(0, 14) 
+     : work.authorships;
+
+     authorshipsToProcess.forEach(a => {//work.authorships.forEach(a => {
+      if (!authors.has(a.author.id)) {
+        authors.set(a.author.id, {
+          name: a.author.display_name,
+          coAuthors: new Set(),
+          publicationCount: 0,
+          institutions: a.institutions?.map(i => i.display_name) || ['Unknown'],
+          papers: [] // Array to store paper information
+        });
+      }
+      // Increment publication count
+      const authorData = authors.get(a.author.id);
+      authorData.publicationCount++;
+       // Add paper information (title and ID)
+       authorData.papers.push({
+        title: work.title || 'Untitled',
+       // publication_year: work.publication_year,
+       // doi: work.doi ? `https://doi.org/${work.doi.replace('https://doi.org/', '')}` : null
+      });
+
+      // Add co-authors (excluding self)
+      authorshipsToProcess
+        .filter(x => x.author.id !== a.author.id)
+        .forEach(x => authors.get(a.author.id).coAuthors.add(x.author.id));
+    });
+  });
+
+  // Convert to array and filter
+  const filteredAuthors = Array.from(authors.entries())
+    .filter(([id, data]) => data.publicationCount >= 2 ) // At least 2 publications
+    .sort((a, b) => b[1].publicationCount - a[1].publicationCount) // Sort by publication count
+   // .slice(0, 10); // Take top 10
+
+  // Now we need to filter *coAuthors to only include those in our top 10
+  const topAuthorIds = new Set(filteredAuthors.map(([id]) => id));
+  
+  return filteredAuthors.map(([id, data]) => ({
+    id,
+    name: data.name,
+    coAuthors: Array.from(data.coAuthors).filter(coId => topAuthorIds.has(coId)),
+    publicationCount: data.publicationCount,
+    institutions: data.institutions,
+    papers: data.papers
+  }));
+};
+
+
+ // with institution
+  // export const processCoAuthorData = (works,selectedInstitution) => {
+  //   console.log("processCoAuthorData selectedInstitution",selectedInstitution);
+  //   const authors = new Map(); // { authorId: { name, coAuthors: Set() } }
+  
+  //   works.forEach(work => {
+  //     work.authorships.forEach(a => {// for each author, 
+  //       if (!authors.has(a.author.id)) {//If the author is new, adds them to the Map. An empty Set to store their co-authors.
+  //         authors.set(a.author.id, {
+  //           name: a.author.display_name,
+  //           coAuthors: new Set(),
+  //           institutions: a.institutions?.map(i => i.display_name) || ['Unknown']
+  //         });
+  //       }
+  //       // Add co-authors (excluding self)
+  //       work.authorships// add the rest of authors to 'coAuthors' of first author
+  //         .filter(x => x.author.id !== a.author.id)
+  //         .forEach(x => authors.get(a.author.id).coAuthors.add(x.author.id));
+  //     });
+  //   });
+  
+  //     // Filter by institution if selected
+  //     let filteredAuthors = Array.from(authors.entries());
+  //       filteredAuthors = filteredAuthors.filter(([id, data]) => 
+  //         data.institutions.includes(selectedInstitution)
+  //       );
+  
+  //     return filteredAuthors.map(([id, data]) => ({
+  //       id,
+  //       name: data.name,
+  //       coAuthors: Array.from(data.coAuthors).filter(coId => authors.has(coId)),
+  //       institution: data.institutions[0] // Primary institution
+  //     }));
+
+  //   // return Array.from(authors.entries()).map(([id, data]) => ({
+  //   //   id,
+  //   //   name: data.name,
+  //   //   coAuthors: Array.from(data.coAuthors),
+  //   // }));
+
+  // };
+
+  // Extract unique institutions
+  export const extractInstitutions = (works) => {
+    const institutionSet = new Set();
+    works.forEach(work => {
+      work.authorships.forEach(a => {
+        a.institutions?.forEach(inst => {
+          if (inst.display_name) institutionSet.add(inst.display_name);
+        });
+      });
+    });
+   // setInstitutions(['All', ...Array.from(institutionSet).sort()]);
+   return [...Array.from(institutionSet).sort()];
   };
 
 //   export const getCountryName = (code) => {

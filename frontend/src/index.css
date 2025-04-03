@@ -43,3 +43,167 @@
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
   }
+  #tooltip strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  #tooltip div {
+    margin: 3px 0;
+    font-size: 12px;
+    color: #555;
+  }
+  #tooltip ul {
+    margin: 5px 0 0 15px;
+    padding-left: 10px;
+    list-style-type: none;
+  }
+  
+  #tooltip li {
+    padding: 2px 0;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .more-link {
+    color: #4dabf7;
+    cursor: pointer;
+    font-style: italic;
+  }
+  
+  .more-link:hover {
+    text-decoration: underline;
+  }
+  /* Add these styles to your index.css */
+
+.search-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.search-results {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-results ul, .selected-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.search-results li, .selected-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.institution-result, .selected-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.select-button, .remove-button {
+  padding: 0.25rem 0.5rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.remove-button {
+  background-color: #f44336;
+}
+
+.selected-institution {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+}
+
+.institution-card {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.selected-list {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+.search-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem;
+  padding-right: 2rem; /* Make space for the clear button */
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.clear-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+}
+
+.clear-button:hover {
+  color: #333;
+}
+
+/* In your CSS file */
+.graph-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 2rem 0;
+  overflow: visible;
+}
+
+.graph-wrapper {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  border: 1px solid #eee; /* optional border */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* optional shadow */
+}
+/* Make sure to install react-icons if you haven't already */
+/* npm install react-icons */
