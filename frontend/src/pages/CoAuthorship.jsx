@@ -179,7 +179,9 @@ import "../index.css"
 
 
   return (
-    <div className="card coauthor-wrapper">
+
+    <div className="coauthor-wrapper">
+       <div >
       <h3>Co-Authorship Network</h3>
       <div className="filters">
         <label className="filter-label">
@@ -278,7 +280,7 @@ import "../index.css"
               )}
               
       </div>
-      <br/>
+   
       <div className="graph-container">
       {isLoadingCoAuthor ? (
         <p>Loading author data...</p>
@@ -303,7 +305,7 @@ import "../index.css"
             ""
         )
       } */}
-     
+     </div>
     </div>
   );
 

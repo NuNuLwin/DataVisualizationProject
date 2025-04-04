@@ -11,7 +11,7 @@ const ChordDiagram = ({ matrix, institutions }) => {
 
     const width = 800;
     const height = 800;
-    const outerRadius = Math.min(width, height) * 0.5 - 150;
+    const outerRadius = Math.min(width, height) * 0.5 - 180;//150
     const innerRadius = outerRadius - 30;
 
     const chord = d3.chord()//d3.chordDirected()//
