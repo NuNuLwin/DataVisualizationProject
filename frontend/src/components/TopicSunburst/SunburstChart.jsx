@@ -109,58 +109,72 @@ export const SunburstChart = ({
   };
 
   const labelGenerator = (svgElement, rootData) => {
-    return d3Select(svgElement)
-      .append("g")
-      .attr("pointer-events", "none")
-      .attr("text-anchor", "middle")
-      .style("user-select", "none")
-      .selectAll("text")
-      .data(rootData.descendants().slice(1))
-      .join("text")
-      .attr("dy", "0.35em")
-      .attr("fill-opacity", (d) => +labelVisible(d.current))
-      .attr("transform", (d) => labelTransform(d.current))
-      .text((d) => labelEllipsis(d.data.name));
-    // .each(function (d) {
-    //   // console.log("labelGenerator d =>", d);
-    //   const textEl = d3Select(this);
-    //   const arcHeight = (d.current.y1 - d.current.y0) * radius;
-    //   const maxLines = Math.floor(arcHeight / 5); // 12px per line
-    //   const words = d.data.name.split(/\s+/);
+    return (
+      d3Select(svgElement)
+        .append("g")
+        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle")
+        .style("user-select", "none")
+        .selectAll("text")
+        .data(rootData.descendants().slice(1))
+        .join("text")
+        .attr("dy", "0.35em")
+        .attr("fill-opacity", (d) => +labelVisible(d.current))
+        .attr("transform", (d) => labelTransform(d.current))
+        // .text((d) => labelEllipsis(d.data.name));
+        .each(function (d) {
+          // console.log("labelGenerator d =>", d);
+          const textEl = d3Select(this);
+          const arcHeight = (d.current.y1 - d.current.y0) * radius;
+          const maxLines = Math.floor(arcHeight / 20); // 12px per line
+          const words = d.data.name.split(/\s+/);
 
-    //   // Clear existing text
-    //   textEl.text(null);
+          // Clear existing text
+          textEl.text(null);
 
-    //   // Add lines until we run out of space
-    //   let line = [];
-    //   let lineCount = 0;
-    //   let tspan = textEl.append("tspan").attr("x", 0).attr("dy", "0em");
+          // Add lines until we run out of space
+          let line = [];
+          let lineCount = 0;
+          let tspan = textEl.append("tspan").attr("x", 0).attr("dy", "0em");
 
-    //   words.forEach((word) => {
-    //     const testLine = [...line, word].join(" ");
-    //     tspan.text(testLine);
+          words.forEach((word) => {
+            const testLine = [...line, word].join(" ");
+            tspan.text(testLine);
 
-    //     // If line is too wide or we've hit max lines
-    //     if (
-    //       tspan.node().getComputedTextLength() > arcHeight * 0.8 ||
-    //       lineCount >= maxLines - 1
-    //     ) {
-    //       tspan.text(line.join(" "));
-    //       line = [word];
-    //       lineCount++;
-    //       tspan = textEl.append("tspan").attr("x", 0).attr("dy", "1em");
-    //     } else {
-    //       line.push(word);
-    //     }
-    //   });
+            // If line is too wide or we've hit max lines
+            if (
+              tspan.node().getComputedTextLength() > arcHeight * 0.8 ||
+              lineCount >= maxLines - 1
+            ) {
+              tspan.text(line.join(" "));
+              line = [word];
+              lineCount++;
+              tspan = textEl.append("tspan").attr("x", 0).attr("dy", "1em");
+            } else {
+              line.push(word);
+            }
+          });
 
-    //   // Add ellipsis if truncated
-    //   if (lineCount >= maxLines - 1 && words.length > line.length) {
-    //     tspan.text(line.join(" ") + "...");
-    //   } else {
-    //     tspan.text(line.join(" "));
-    //   }
-    // });
+          // console.log(
+          //   `=== name: ${d.data.name} - line count: ${lineCount} - maxLines: ${maxLines} - Arc Height - ${arcHeight}`
+          // );
+          // Add ellipsis if truncated
+          if (lineCount >= maxLines - 1 && words.length > line.length) {
+            tspan.text(line.join(" ") + "...");
+          } else {
+            tspan.text(line.join(" "));
+          }
+
+          if (lineCount === 0) {
+            textEl.select("tspan").attr("x", 0).attr("dy", "0em");
+          } else {
+            textEl
+              .select("tspan")
+              .attr("x", 0)
+              .attr("dy", `${-1.5 * lineCount}`);
+          }
+        })
+    );
   };
 
   const circleGenerator = (svgElement, rootData, radius) => {
@@ -173,14 +187,70 @@ export const SunburstChart = ({
       .on("click", clicked);
   };
 
-  const mainTitleGenerator = (svgElement) => {
-    return d3Select(svgElement)
+  const wrapText = (text, maxWidth) => {
+    const words = text.split(" ");
+    let lines = [];
+    let currentLine = "";
+
+    // Create lines of text that fit within maxWidth
+    words.forEach((word) => {
+      const testLine = currentLine ? currentLine + " " + word : word;
+      const testWidth = d3Select(svgRef.current)
+        .append("g")
+        .attr("class", "temp-wrapper")
+        .append("text")
+        .text(testLine)
+        .style("visibility", "hidden")
+        .node()
+        .getComputedTextLength();
+
+      if (testWidth > maxWidth) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+
+    if (currentLine) lines.push(currentLine);
+
+    // Clean up the temporary text node
+    d3Select(svgRef.current).select("g.temp-wrapper").remove();
+
+    return lines;
+  };
+
+  const mainTitleGenerator = (domain) => {
+    // Function to wrap text
+    const maxWidth = d3Select(svgRef.current).select("circle")._groups[0][0]
+      ? d3Select(svgRef.current).select("circle").node().getBoundingClientRect()
+          .width - 80
+      : 100;
+    const wrappedText = wrapText(domain, maxWidth);
+    const centerX = 0;
+    const centerY =
+      wrappedText.length === 1 ? 0 : (wrappedText.length - 1) * -8;
+    d3Select(svgRef.current).select("g.main-title-wrapper").remove();
+
+    return d3Select(svgRef.current)
       .append("g")
       .attr("class", "main-title-wrapper")
       .append("text")
       .attr("class", "main-title")
-      .style("font-weight", "bold")
-      .text(selectedDomain);
+      .attr("x", centerX)
+      .attr("y", centerY)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .style("font-size", "14px")
+      .style("font-family", "Arial")
+      .style("fill", "black")
+      .selectAll("tspan")
+      .data(wrappedText)
+      .enter()
+      .append("tspan")
+      .attr("x", centerX)
+      .attr("dy", (d, i) => (i === 0 ? 0 : "1.2em"))
+      .text((d) => d);
   };
 
   /* Hooks */
@@ -201,7 +271,7 @@ export const SunburstChart = ({
 
       root.each((d) => (d.current = d));
 
-      mainTitleGenerator(svgRef.current);
+      mainTitleGenerator(selectedDomain);
 
       // Create the arc generator.
       arc = arcGenerator();
@@ -265,8 +335,9 @@ export const SunburstChart = ({
   }
 
   function clicked(event, p) {
+    console.log("clicked ==> ", p);
     // set main title of sunburst for clicked element name
-    d3Select(".main-title").text(p?.data?.name || selectedDomain);
+    mainTitleGenerator(p?.data?.name || selectedDomain);
 
     parent.datum(p.parent || root);
 
@@ -323,7 +394,7 @@ export const SunburstChart = ({
   }
 
   function labelVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
+    return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.05;
   }
 
   function labelTransform(d) {

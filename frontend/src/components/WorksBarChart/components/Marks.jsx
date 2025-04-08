@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { select, format, color } from "d3";
+import { select, format } from "d3";
 
 const d3Format = format(",");
 
@@ -12,28 +12,55 @@ export const Marks = ({
   colorScale,
   colorDataMap,
   colorValue,
-  selected,
+  selectedType,
   tooltipRef,
   toolTipText,
+  selectedWork,
+  setSelectedWork,
 }) => {
-  const rectRefs = useRef([]);
+  // const rectRefs = useRef([]);
 
-  useEffect(() => {
-    rectRefs.current.forEach((rect, i) => {
-      select(rect)
-        .attr("width", 0)
-        .transition()
-        .duration(800)
-        .attr("width", (d) => xScale(xValue(data[i])))
-        .delay(i * 100);
-    });
-  }, [data, xScale, xValue]);
+  // useEffect(() => {
+  //   if (!data) return;
+  //   rectRefs.current.forEach((rect, i) => {
+  //     select(rect)
+  //       .attr("width", 0)
+  //       // .transition()
+  //       // .duration(800)
+  //       .attr("width", (d) => xScale(xValue(data[i])));
+  //     // .delay(i * 100);
+  //   });
+  // }, [data, xScale, yScale]);
+
+  // useEffect(() => {
+  //   console.log("=== data ===", data);
+  //   if (!data) return;
+  //   rectRefs.current.forEach((rect, i) => {
+  //     if (selectedWork !== 123 && selectedWork !== yValue(data[i])) {
+  //       select(rect).attr("fill", "#ccc");
+  //     } else if (
+  //       selectedWork === 123 &&
+  //       selectedType &&
+  //       selectedType !== colorDataMap.get(colorValue(data[i]))
+  //     ) {
+  //       select(rect).attr("fill", "#ccc");
+  //     } else {
+  //       console.log("=== data 2 ===", i);
+  //       console.log(rectRefs);
+  //       // select(rect).attr(
+  //       //   "fill",
+  //       //   colorScale(colorDataMap.get(colorValue(data[i])))
+  //       // );
+  //     }
+  //   });
+  // }, [data, xScale, yScale, selectedType, selectedWork]);
 
   return data.map((d, i) => (
     <g
       key={yValue(d)}
       className="mark"
       onMouseOver={(e) => {
+        setSelectedWork(yValue(d));
         const string = toolTipText(d);
         select(tooltipRef.current)
           .style("display", "block")
@@ -41,16 +68,23 @@ export const Marks = ({
           .style("left", e.pageX + 10 + "px")
           .style("top", e.pageY - 10 + "px");
       }}
-      onMouseOut={() => select(tooltipRef.current).style("display", "none")}
+      onMouseOut={() => {
+        select(tooltipRef.current).style("display", "none");
+        setSelectedWork(123);
+      }}
     >
       <rect
         className="mark"
-        ref={(el) => (rectRefs.current[i] = el)}
+        // ref={(el) => (rectRefs.current[i] = el)}
         x={0}
         y={yScale(yValue(d))}
         height={yScale.bandwidth()}
+        width={xScale(xValue(d))}
         fill={
-          selected && selected !== colorDataMap.get(colorValue(d))
+          (selectedWork !== 123 && selectedWork !== yValue(d)) ||
+          (selectedWork === 123 &&
+            selectedType &&
+            selectedType !== colorDataMap.get(colorValue(d)))
             ? "#ccc"
             : colorScale(colorDataMap.get(colorValue(d)))
         }

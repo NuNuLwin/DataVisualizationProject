@@ -43,11 +43,14 @@ export const BarChart = ({
 }) => {
   const [perPage, setPerPage] = useState(10);
   const [selectedType, setSelectedType] = useState(null);
+  const [selectedWork, setSelectedWork] = useState(123);
   const tooltipRef = useRef();
 
   let data = useData(selectedTopic, perPage);
 
   const handlePerPageChange = (event) => {
+    setSelectedType(null);
+    setSelectedWork(123);
     setPerPage(Number(event.target.value));
   };
 
@@ -195,9 +198,11 @@ export const BarChart = ({
             colorScale={colorScale}
             colorDataMap={colorDataMap}
             colorValue={colorValue}
-            selected={selectedType}
+            selectedType={selectedType}
             toolTipText={toolTipText}
             tooltipRef={tooltipRef}
+            selectedWork={selectedWork}
+            setSelectedWork={setSelectedWork}
           />
         </g>
       </svg>
