@@ -27,7 +27,7 @@ export const useData = (selectedTopic, perPage = 10) => {
       const fetchData = async () => {
         const url = `https://api.openalex.org/works?filter=primary_topic.id:${encodeURIComponent(
           selectedTopic.data.id
-        )}&sort=cited_by_count:desc&per_page=${perPage}`;
+        )}&sort=cited_by_count:desc&per_page=15`;
 
         try {
           const response = await fetch(url);
@@ -38,7 +38,7 @@ export const useData = (selectedTopic, perPage = 10) => {
           console.log("result..", result);
 
           // Remove HTML tags and format text
-          const cleanedResults = result.results.map((r) => ({
+          const cleanedResults = result.results.slice(0, perPage).map((r) => ({
             ...r,
             display_name: formatText(
               r.display_name

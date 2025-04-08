@@ -203,6 +203,7 @@ export const BarChart = ({
             tooltipRef={tooltipRef}
             selectedWork={selectedWork}
             setSelectedWork={setSelectedWork}
+            barCount={data.length}
           />
         </g>
       </svg>

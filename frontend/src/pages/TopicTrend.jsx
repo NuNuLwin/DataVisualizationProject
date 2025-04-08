@@ -76,7 +76,7 @@ export const TopicTrend = () => {
       >
         <h2 className="text-center">
           {selectedTopic?.data?.name
-            ? `Top Works for Topic: ${selectedTopic.data.name}`
+            ? `Top Papers for Topic: ${selectedTopic.data.name}`
             : "Please select a topic from the Sunburst chart"}
         </h2>
 

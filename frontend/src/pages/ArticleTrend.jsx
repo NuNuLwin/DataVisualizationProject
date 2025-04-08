@@ -41,7 +41,7 @@ export const ArticleTrend = () => {
     <div className="card article-trend-wrapper">
       <h2>
         <center>
-          Top Works Trends Over 14 Years
+          Top 10 Trending Papers Over the Past 14 Years
           <br />
           <h3>{selectedField ? `Field: ${selectedField.name}` : ""}</h3>
         </center>
