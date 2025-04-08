@@ -182,7 +182,7 @@ import "../index.css"
 
     <div className="coauthor-wrapper">
        <div >
-      <h3>Co-Authorship Network</h3>
+      <h3>Co-Authorship Network Graph (with more than 2 publication counts)</h3>
       <div className="filters">
         <label className="filter-label">
           Filter by Field:
