@@ -264,7 +264,7 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
             // .map(paper => `<li>${paper.title} (${paper.publication_year})</li>`)
             // .join('');
             .map(paper => `
-              <li style="font-size: 5px; margin-bottom: 3px;">
+              <li style="font-size: 12px; margin-bottom: 3px;">
                 ${paper.title}
               </li>`
             )
