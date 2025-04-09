@@ -270,6 +270,7 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
          // ********* Tooltip interaction
          // Track last click position
           const showTooltip = (event, d, showAll = false) => {
+            console.log("d id ",d.id);
             event.stopPropagation();
 
             // if (event) {
@@ -291,33 +292,41 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
             const author = coAuthorData.find(a => a.id === d.id);
             const coAuthorCount = author.coAuthors.length;
             const papersList = author.papers
-            // .map(paper => `<li>${paper.title} (${paper.publication_year})</li>`)
-            // .join('');
-            .map(paper => `
-              <li style="font-size: 12px; margin-bottom: 3px;">
-                ${paper.title}
-              </li>`
+            .map(paper => 
+            
+
+             `
+            <li style="
+              font-size: 12px;
+              margin-bottom: 3px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              cursor: default;
+            " title="${paper.title.replace(/"/g, '&quot;')}">
+              ${paper.title}
+            </li>`
             )
             .join('');
 
-            const displayCoAuthors = () => {
-              if (showAll || coAuthorCount <= 5) {
-                return author.coAuthors.map(id => {
-                  const coAuthor = coAuthorData.find(a => a.id === id);
-                  return `<li>${coAuthor?.name || id}</li>`;
-                }).join("");
-              } else {
-                const topCoAuthors = author.coAuthors.slice(0, 3).map(id => {
-                  const coAuthor = coAuthorData.find(a => a.id === id);
-                  return `<li>${coAuthor?.name || id}</li>`;
-                }).join("");
+            // const displayCoAuthors = () => {
+            //   if (showAll || coAuthorCount <= 5) {
+            //     return author.coAuthors.map(id => {
+            //       const coAuthor = coAuthorData.find(a => a.id === id);
+            //       return `<li>${coAuthor?.name || id}</li>`;
+            //     }).join("");
+            //   } else {
+            //     const topCoAuthors = author.coAuthors.slice(0, 3).map(id => {
+            //       const coAuthor = coAuthorData.find(a => a.id === id);
+            //       return `<li>${coAuthor?.name || id}</li>`;
+            //     }).join("");
                 
-                return `
-                  ${topCoAuthors}
-                  <li class="more-link">and ${coAuthorCount - 3} more...</li>
-                `;
-              }
-            };
+            //     return `
+            //       ${topCoAuthors}
+            //       <li class="more-link">and ${coAuthorCount - 3} more...</li>
+            //     `;
+            //   }
+            // };
 
             tooltip
               .html(`
@@ -333,33 +342,31 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
                 ">
                   ${papersList}
                 </ul>
-                <div>Co-authors (${author.coAuthors.length}):</div>
-                <ul style="
-                  margin: 5px 0 0 15px;
-                  padding-left: 10px;
-                  max-height: ${(showAll || coAuthorCount <= 10) ? 'none' : '150px'};
-                  overflow-y: ${(showAll || coAuthorCount <= 10) ? 'visible' : 'auto'};
-                ">
-                  ${displayCoAuthors()}
-                </ul>
+                <div>Co-authors : ${author.coAuthors.length}</div>
+               
               `)
-              // .style("left", `${event.pageX + 15}px`)
-              // .style("top", `${event.pageY + 15}px`)
               .style("left", `${showAll ? originalTooltipPosition.current.x : event.pageX + 15}px`)
               .style("top", `${showAll ? originalTooltipPosition.current.y : event.pageY + 15}px`)
-              .style("opacity", 1);
-              // .style("left", `${lastClickPosition.current.x + 15}px`)
-              // .style("top", `${lastClickPosition.current.y + 15}px`)
-              // .style("opacity", 1);
+              .style("opacity", 1)
+              .style("max-width", "400px");
 
-            // Add click handler for "more" link if not showing all
-            if (!showAll && coAuthorCount > 5) {
-              tooltip.select(".more-link")
-                .on("click", function(event) {
-                  event.stopPropagation();
-                  showTooltip(event, d, true);
-                });
-            }
+            // tooltip
+            // .html(`
+            //   <strong>Hello!</strong>
+            // `)
+            // .style("left", `${showAll ? originalTooltipPosition.current.x : event.pageX + 15}px`)
+            // .style("top", `${showAll ? originalTooltipPosition.current.y : event.pageY + 15}px`)
+            // .style("opacity", 1);
+
+
+            // // Add click handler for "more" link if not showing all
+            // if (!showAll && coAuthorCount > 5) {
+            //   tooltip.select(".more-link")
+            //     .on("click", function(event) {
+            //       event.stopPropagation();
+            //       showTooltip(event, d, true);
+            //     });
+            // }
 
           };
         
@@ -372,9 +379,9 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
            }
           });
        
-          svg.on("mousedown", () => {
-            console.log("Mouse down on SVG background");
-          });
+          // svg.on("mousedown", () => {
+          //   console.log("Mouse down on SVG background");
+          // });
 
           // Close tooltip when clicking anywhere
           const closeTooltip = () => {
