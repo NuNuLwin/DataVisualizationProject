@@ -76,7 +76,7 @@ export const InstitutionCollaboration = () => {
       }else{
         setDisplayMessage(
           <>
-          No Institutional Collaborations found for Concept: <strong>{selectedConceptDisplayname}</strong>
+          No Institutional Collaborations found for field: <strong>{selectedConceptDisplayname}</strong>
           ,Years: <strong>{selectedYear}</strong>.
           </>
           // "No Collaborations found for \n Concept: "+selectedConceptDisplayname+" Years: "+selectedYear

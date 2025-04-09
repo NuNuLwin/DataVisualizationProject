@@ -121,7 +121,7 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
         
       // **** Set up SVG
       const width = 1000, height = 700;
-      const padding = 100; // Safe area padding
+      const padding = 10; // Safe area padding
 
       const svg = d3.select(svgRef.current)
         .attr("width", width)
@@ -174,7 +174,8 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
         .join("line")
         .attr("stroke", "#adb5bd")
         .attr("stroke-width", 1.5);
-  
+        
+        let isDragging = false;
       // Draw nodes
       const node = svg.append("g")
         .selectAll("circle")
@@ -185,7 +186,9 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
         //.attr("stroke", "#228be6")
         .attr("fill", d => color(d.community))//color by cluster
         .attr("stroke-width", 2)
-        .call(drag(simulation));
+        .style("pointer-events", "visiblePainted") 
+        .call(drag(simulation)
+        );
   
       // Add labels
       const label = svg.append("g")
@@ -234,6 +237,32 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
           });
       }
 
+      // function drag(simulation) {
+      //   function dragstarted(event, d) {
+      //     if (!event.active) simulation.alphaTarget(0.3).restart();
+      //     d.fx = d.x;
+      //     d.fy = d.y;
+      //     // Bring node to front
+      //     event.sourceEvent.stopPropagation();
+      //     d3.select(this).raise();
+      //   }
+      
+      //   function dragged(event, d) {
+      //     d.fx = event.x;
+      //     d.fy = event.y;
+      //   }
+      
+      //   function dragended(event, d) {
+      //     if (!event.active) simulation.alphaTarget(0);
+      //     d.fx = null;
+      //     d.fy = null;
+      //   }
+      
+      //   return d3.drag()
+      //     .on("start", dragstarted)
+      //     .on("drag", dragged)
+      //     .on("end", dragended);
+      // }
         // // Add viewBox to enable pan/zoom if nodes go out of view
         // svg.attr("viewBox", [0, 0, width, height])
         // .attr("preserveAspectRatio", "xMidYMid meet");;
@@ -242,6 +271,7 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
          // Track last click position
           const showTooltip = (event, d, showAll = false) => {
             event.stopPropagation();
+
             // if (event) {
             //   event.stopPropagation();
             //   lastClickPosition.current = {
@@ -332,11 +362,18 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
             }
 
           };
-
+        
           node.on("click", (event, d) => {
             console.log("Node onClick");
             event.stopPropagation();
-            showTooltip(event, d);
+            // Only show tooltip if not dragging
+           if (!event.defaultPrevented) {
+              showTooltip(event, d);
+           }
+          });
+       
+          svg.on("mousedown", () => {
+            console.log("Mouse down on SVG background");
           });
 
           // Close tooltip when clicking anywhere
