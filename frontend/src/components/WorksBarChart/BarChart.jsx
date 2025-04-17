@@ -11,7 +11,7 @@ import {
 } from "d3";
 
 /* data retrieval */
-import { useData } from "./useData";
+import { useData } from "./hooks/useData";
 
 /* components */
 import { AxisBottom } from "./components/AxisBottom";
@@ -20,21 +20,19 @@ import { ColorLegend } from "./components/ColorLegend";
 import { Marks } from "./components/Marks";
 import { Loading } from "../Loading";
 
-/* css */
-import "./BarChart.css";
+/* utils */
+import {
+  circleRadius,
+  tickSpacing,
+  tickTextOffset,
+  margin,
+  xAxisOffsetValue,
+  colorLegendLabel,
+  fadeOpacity,
+} from "./utils/chartConstants";
 
-const circleRadius = 7;
-const tickSpacing = 22;
-const tickTextOffset = 15;
-const margin = {
-  top: 20,
-  right: 200,
-  bottom: 100,
-  left: 450,
-};
-const xAxisOffsetValue = 70;
-const colorLegendLabel = "Work Type";
-const fadeOpacity = 0.4;
+/* css */
+import "./styles/BarChart.css";
 
 export const BarChart = ({
   width = window.innerWidth,
