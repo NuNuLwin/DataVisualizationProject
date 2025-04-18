@@ -88,7 +88,7 @@ export const BarChart = ({
   /* Data Maps */
   const colorMap = new Map();
   const colorDataMap = new Map();
-  data.map((d) => {
+  data.forEach((d) => {
     if (!colorMap.has(d.type)) {
       colorMap.set(d.type, "");
     }
