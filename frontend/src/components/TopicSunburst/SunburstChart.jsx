@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 
 /* d3 */
 import {
-  arc as d3Arc,
   format as d3Format,
   hierarchy,
   interpolate,
@@ -13,17 +12,26 @@ import {
 } from "d3";
 
 /* components */
-import { useData } from "./useData";
+import { useData } from "./hooks/useData";
 import { Loading } from "../Loading";
 
-/* css */
-import "./SunburstChart.css";
+/* utils */
+import {
+  RADIUS_DIVIDER,
+  VIEWBOX_MIN_X,
+  VIEWBOX_MIN_Y,
+} from "./constants/sunburstConstants";
+import { arcVisible, labelTransform, labelVisible } from "./utils/arcUtils";
+import {
+  arcGenerator,
+  pathGenerator,
+  labelGenerator,
+  circleGenerator,
+  mainTitleGenerator,
+} from "./utils/generators";
 
-const RADIUS_DIVIDER = 12;
-const VIEWBOX_MIN_X = (w) => -1 * (w / 2.5);
-const VIEWBOX_MIN_Y = (h) => -1 * (h / 2.3);
-const DEFAULT_MAIN_TITLE = "Physical Sciences";
-const TEXT_WRAP_COUNT = (18 / RADIUS_DIVIDER) * 10;
+/* css */
+import "./styles/SunburstChart.css";
 
 export const SunburstChart = ({
   width = window.innerWidth,
@@ -43,221 +51,10 @@ export const SunburstChart = ({
   let arc = null;
   let label = null;
 
-  /* Generators */
-  const arcGenerator = () => {
-    return d3Arc()
-      .startAngle((d) => d.x0)
-      .endAngle((d) => d.x1)
-      .padAngle((d) => Math.min((d.x1 - d.x0) / 2, 0.005))
-      .padRadius(radius * 1.5)
-      .innerRadius((d) => d.y0 * radius)
-      .outerRadius((d) => Math.max(d.y0 * radius, d.y1 * radius - 1));
-  };
-  const pathGenerator = (svgElement, rootData, arcGenerator, color) => {
-    return d3Select(svgElement)
-      .append("g")
-      .selectAll("path")
-      .data(rootData.descendants().slice(1))
-      .join("path")
-      .attr("fill", (d) => {
-        while (d.depth > 1) d = d.parent;
-        return color(d.data.name);
-      })
-      .attr("fill-opacity", (d) =>
-        arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0
-      )
-      .attr("pointer-events", (d) => (arcVisible(d.current) ? "auto" : "none"))
-      .attr("d", (d) => {
-        // console.log("Path Generator ==>", d);
-        return arcGenerator(d.current);
-      })
-      .on("mouseover", function (event, d) {
-        d3Select(this).attr("fill-opacity", 1);
-        // .attr("fill", "gold"); // Optionally change the color to something brighter
-      })
-      .on("mouseout", function (event, d) {
-        d3Select(this)
-          .attr("fill-opacity", (d) =>
-            arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0
-          )
-          .attr("fill", (d) => {
-            while (d.depth > 1) d = d.parent;
-            return color(d.data.name);
-          });
-      });
-  };
-
-  // const pathGenerator = (svgElement, rootData, arcGenerator, color) => {
-  //   return d3Select(svgElement)
-  //     .append("g")
-  //     .selectAll("path")
-  //     .data(rootData.descendants().slice(1))
-  //     .join("path")
-  //     .attr("fill", (d) => {
-  //       while (d.depth > 1) d = d.parent;
-  //       return color(d.data.name);
-  //     })
-  //     .attr("fill-opacity", (d) =>
-  //       arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0
-  //     )
-  //     .attr("pointer-events", (d) => (arcVisible(d.current) ? "auto" : "none"))
-  //     .attr("d", (d) => arcGenerator(d.current));
-  // };
-
-  const labelEllipsis = (text) => {
-    return text.length > TEXT_WRAP_COUNT ? text.substring(0, 16) + "..." : text;
-  };
-
-  const labelGenerator = (svgElement, rootData) => {
-    return d3Select(svgElement)
-      .append("g")
-      .attr("pointer-events", "none")
-      .attr("text-anchor", "middle")
-      .style("user-select", "none")
-      .selectAll("text")
-      .data(rootData.descendants().slice(1))
-      .join("text")
-      .attr("dy", "0.35em")
-      .attr("fill-opacity", (d) => +labelVisible(d.current))
-      .attr("transform", (d) => labelTransform(d.current))
-      .text((d) => labelEllipsis(d.data.name));
-    // .each(function (d) {
-    //   // console.log("labelGenerator d =>", d);
-    //   const textEl = d3Select(this);
-    //   const arcHeight = (d.current.y1 - d.current.y0) * radius;
-    //   const maxLines = Math.floor(arcHeight / 20); // 12px per line
-    //   const words = d.data.name.split(/\s+/);
-
-    //   // Clear existing text
-    //   textEl.text(null);
-
-    //   // Add lines until we run out of space
-    //   let line = [];
-    //   let lineCount = 0;
-    //   let tspan = textEl.append("tspan").attr("x", 0).attr("dy", "0em");
-
-    //   words.forEach((word) => {
-    //     const testLine = [...line, word].join(" ");
-    //     tspan.text(testLine);
-
-    //     // If line is too wide or we've hit max lines
-    //     if (
-    //       tspan.node().getComputedTextLength() > arcHeight * 0.8 ||
-    //       lineCount >= maxLines - 1
-    //     ) {
-    //       tspan.text(line.join(" "));
-    //       line = [word];
-    //       lineCount++;
-    //       tspan = textEl.append("tspan").attr("x", 0).attr("dy", "1em");
-    //     } else {
-    //       line.push(word);
-    //     }
-    //   });
-
-    //   // console.log(
-    //   //   `=== name: ${d.data.name} - line count: ${lineCount} - maxLines: ${maxLines} - Arc Height - ${arcHeight}`
-    //   // );
-    //   // Add ellipsis if truncated
-    //   if (lineCount >= maxLines - 1 && words.length > line.length) {
-    //     tspan.text(line.join(" ") + "...");
-    //   } else {
-    //     tspan.text(line.join(" "));
-    //   }
-
-    //   if (lineCount === 0) {
-    //     textEl.select("tspan").attr("x", 0).attr("dy", "0em");
-    //   } else {
-    //     textEl
-    //       .select("tspan")
-    //       .attr("x", 0)
-    //       .attr("dy", `${-1.5 * lineCount}`);
-    //   }
-    // })
-  };
-
-  const circleGenerator = (svgElement, rootData, radius) => {
-    return d3Select(svgElement)
-      .append("circle")
-      .datum(rootData)
-      .attr("r", radius)
-      .attr("fill", "none")
-      .attr("pointer-events", "all")
-      .on("click", clicked);
-  };
-
-  const wrapText = (text, maxWidth) => {
-    const words = text.split(" ");
-    let lines = [];
-    let currentLine = "";
-
-    // Create lines of text that fit within maxWidth
-    words.forEach((word) => {
-      const testLine = currentLine ? currentLine + " " + word : word;
-      const testWidth = d3Select(svgRef.current)
-        .append("g")
-        .attr("class", "temp-wrapper")
-        .append("text")
-        .text(testLine)
-        .style("visibility", "hidden")
-        .node()
-        .getComputedTextLength();
-
-      if (testWidth > maxWidth) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    });
-
-    if (currentLine) lines.push(currentLine);
-
-    // Clean up the temporary text node
-    d3Select(svgRef.current).select("g.temp-wrapper").remove();
-
-    return lines;
-  };
-
-  const mainTitleGenerator = (domain) => {
-    // Function to wrap text
-    const maxWidth = d3Select(svgRef.current).select("circle")._groups[0][0]
-      ? d3Select(svgRef.current).select("circle").node().getBoundingClientRect()
-          .width - 80
-      : 100;
-    const wrappedText = wrapText(domain, maxWidth);
-    const centerX = 0;
-    const centerY =
-      wrappedText.length === 1 ? 0 : (wrappedText.length - 1) * -8;
-    d3Select(svgRef.current).select("g.main-title-wrapper").remove();
-
-    return d3Select(svgRef.current)
-      .append("g")
-      .attr("class", "main-title-wrapper")
-      .append("text")
-      .attr("class", "main-title")
-      .attr("x", centerX)
-      .attr("y", centerY)
-      .attr("text-anchor", "middle")
-      .attr("dominant-baseline", "middle")
-      .style("font-size", "14px")
-      .style("font-family", "Arial")
-      .style("fill", "black")
-      .selectAll("tspan")
-      .data(wrappedText)
-      .enter()
-      .append("tspan")
-      .attr("x", centerX)
-      .attr("dy", (d, i) => (i === 0 ? 0 : "1.2em"))
-      .text((d) => d);
-  };
-
   /* Hooks */
   useEffect(() => {
     if (svgRef.current && data) {
       setLoading(false);
-      // const color = scaleOrdinal(
-      //   quantize(interpolateRainbow, data.children.length + 1)
-      // );
       const color = scaleOrdinal(schemeTableau10);
       const chartHierarchy = hierarchy(data)
         .sum((d) => d.value)
@@ -269,10 +66,10 @@ export const SunburstChart = ({
 
       root.each((d) => (d.current = d));
 
-      mainTitleGenerator(selectedDomain);
+      mainTitleGenerator(svgRef, selectedDomain);
 
       // Create the arc generator.
-      arc = arcGenerator();
+      arc = arcGenerator(radius);
 
       // Append the arcs.
       path = pathGenerator(svgRef.current, root, arc, color);
@@ -288,42 +85,28 @@ export const SunburstChart = ({
         .on("click", topicClicked);
 
       const format = d3Format(",d");
-      path.append("title").text(
-        (d) => {
-          //   {
-          //   d.ancestors().length
-          // }
-          let titleStr = "";
-          let length = d.ancestors().length;
+      path.append("title").text((d) => {
+        let titleStr = "";
+        let length = d.ancestors().length;
 
-          if (length > 1) {
-            titleStr += `${"Field: " + d.ancestors()[length - 2].data.name}`;
-          }
-          if (length > 2) {
-            titleStr += `${
-              "\nSub Field: " + d.ancestors()[length - 3].data.name
-            }`;
-          }
-          if (length > 3) {
-            titleStr += `${"\nTopic: " + d.ancestors()[length - 4].data.name}`;
-          }
-          // if (length > 4) {
-          //   titleStr += `${"\nTopic: " + d.ancestors()[length - 5].data.name}`;
-          // }
-          titleStr += `${"\n\nWorks: " + format(d.value).toString()}`;
-
-          return titleStr;
+        if (length > 1) {
+          titleStr += `${"Field: " + d.ancestors()[length - 2].data.name}`;
         }
+        if (length > 2) {
+          titleStr += `${
+            "\nSub Field: " + d.ancestors()[length - 3].data.name
+          }`;
+        }
+        if (length > 3) {
+          titleStr += `${"\nTopic: " + d.ancestors()[length - 4].data.name}`;
+        }
+        titleStr += `${"\n\nWorks: " + format(d.value).toString()}`;
 
-        // `${d
-        //   .ancestors()
-        //   .map((d) => d.data.name)
-        //   .reverse()
-        //   .join("/")}\nWorks: ${format(d.value)}`
-      );
-      label = labelGenerator(svgRef.current, root);
+        return titleStr;
+      });
+      label = labelGenerator(svgRef.current, root, radius);
 
-      parent = circleGenerator(svgRef.current, root, radius);
+      parent = circleGenerator(svgRef.current, root, radius, clicked);
     }
   }, [data, selectedDomain]);
 
@@ -333,9 +116,8 @@ export const SunburstChart = ({
   }
 
   function clicked(event, p) {
-    console.log("clicked ==> ", p);
     // set main title of sunburst for clicked element name
-    mainTitleGenerator(p?.data?.name || selectedDomain);
+    mainTitleGenerator(svgRef, p?.data?.name || selectedDomain);
 
     parent.datum(p.parent || root);
 
@@ -384,21 +166,7 @@ export const SunburstChart = ({
       })
       .transition(t)
       .attr("fill-opacity", (d) => +labelVisible(d.target))
-      .attrTween("transform", (d) => () => labelTransform(d.current));
-  }
-
-  function arcVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
-  }
-
-  function labelVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.05;
-  }
-
-  function labelTransform(d) {
-    const x = (((d.x0 + d.x1) / 2) * 180) / Math.PI;
-    const y = ((d.y0 + d.y1) / 2) * radius;
-    return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+      .attrTween("transform", (d) => () => labelTransform(d.current, radius));
   }
 
   return (

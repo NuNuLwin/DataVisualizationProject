@@ -1,21 +1,18 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { BarChart } from "../components/WorksBarChart/BarChart";
 import { SunburstChart } from "../components/TopicSunburst/SunburstChart";
 import "./TopicTrend.css";
 
 const DROPDOWN_WIDTH = 400;
-const REDUCED_MARGIN_TOP_BAR_CHART = 150;
-
+const domains = [
+  "Physical Sciences",
+  "Life Sciences",
+  "Health Sciences",
+  "Social Sciences",
+];
 export const TopicTrend = () => {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedDomain, setSelectedDomain] = useState("Health Sciences");
-
-  const domains = [
-    "Physical Sciences",
-    "Life Sciences",
-    "Health Sciences",
-    "Social Sciences",
-  ];
 
   const handleSelectedTopic = (topic) => {
     setSelectedTopic(topic);

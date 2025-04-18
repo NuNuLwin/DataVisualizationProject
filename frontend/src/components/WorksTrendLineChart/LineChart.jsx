@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 /* d3 */
 import {
@@ -6,14 +6,13 @@ import {
   scaleLinear,
   timeFormat,
   scaleOrdinal,
-  schemeCategory10,
   pointer,
   leastIndex,
   select,
 } from "d3";
 
 /* data retrieval */
-import { useData } from "./useData";
+import { useData } from "./hooks/useData";
 import { Loading } from "../Loading";
 
 /* components */
@@ -22,34 +21,28 @@ import { AxisLeft } from "./components/AxisLeft";
 import { ColorLegend } from "./components/ColorLegend";
 import { Marks } from "./components/Marks";
 
-/* css */
-import "./LineChart.css";
+/* utils */
+import {
+  circleRadius,
+  fadeOpacity,
+  margin,
+  xAxisOffsetValue,
+  yAxisLabelOffset,
+  yAxisLabel,
+  colorLegendLabel,
+  tooltipTopPadding,
+  tooltipLeftPadding,
+  xAxisLabel,
+} from "./utils/chartConstants";
+import { toolTipText } from "./utils/chartUtils";
 
-const circleRadius = 7;
-const fadeOpacity = 0.4;
-const margin = {
-  top: 20,
-  right: 200,
-  bottom: 100,
-  left: 120,
-};
-const xAxisOffsetValue = 60;
-const yAxisLabelOffset = 70;
+/* css */
+import "./styles/LineChart.css";
 
 const xAxisTickFOrmat = timeFormat("%a");
-
 const labelValue = (d) => d.name;
-
 const xValue = (d) => d.year;
-const xAxisLabel = "Year";
-
 const yValue = (d) => d.cited_by_count;
-const yAxisLabel = "Citation Count";
-
-const colorLegendLabel = "Open Access";
-
-const tooltipTopPadding = 65;
-const tooltipLeftPadding = 10;
 
 export const LineChart = ({
   width = window.innerWidth,
@@ -118,21 +111,6 @@ export const LineChart = ({
       : "";
   };
 
-  /* Tooltip Text */
-  const toolTipText = (d) => {
-    return (
-      "<p>" +
-      labelValue(d) +
-      "<br><br>Publication Year: " +
-      pubYearValue(d) +
-      "<br><br>Authors: " +
-      authorValue(d) +
-      "<br><br>Institutions: " +
-      institutionValue(d) +
-      "</p>"
-    );
-  };
-
   const dataMap = new Map(); // { article name : [ objects ]}
   const oaStatusMap = new Map(); // { oa status : [ article name ]}
   const oaStatusDataMap = new Map(); // { article name : oa status }
@@ -191,10 +169,6 @@ export const LineChart = ({
 
   function pointerMove(event, key) {
     const [xm, ym] = pointer(event);
-    // console.log("=== event ");
-    // console.log("=== pointer key ===", key);
-    // console.log("=== pointer move ===", dataMap.get(key));
-    // console.log("=== pointer move new ===", xm, ym);
     const i = leastIndex(dataMap.get(key), (obj) =>
       Math.hypot(xScale(xValue(obj)) - xm, yScale(yValue(obj)) - ym)
     );
@@ -204,12 +178,13 @@ export const LineChart = ({
       .style("opacity", 1)
       .style("stroke", colorScale(oaStatusDataMap.get(key)))
       .raise();
-    // select(pointerRef.current).attr(
-    //   "transform",
-    //   `translate(${xScale(xValue(obj))},${yScale(yValue(obj))})`
-    // );
-    // select(pointerRef.current).select("text").text(labelValue(obj));
-    const string = toolTipText(obj);
+    const string = toolTipText(
+      obj,
+      labelValue,
+      pubYearValue,
+      authorValue,
+      institutionValue
+    );
     select(tooltipRef.current)
       .style("display", "block")
       .html(string)

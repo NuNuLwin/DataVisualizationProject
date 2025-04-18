@@ -10,21 +10,21 @@ export const useData = (selectedDomain) => {
   useEffect(() => {
     let domainData = null;
     json(url).then((d) => {
-      d.children.map((domain) => {
+      d.children.forEach((domain) => {
         if (domain.name !== selectedDomain) {
           return;
         }
         // field
-        domain.children.map((field) => {
+        domain.children.forEach((field) => {
           // sub field
-          field.children.map((subfield) => {
+          field.children.forEach((subfield) => {
             // topic
             subfield.children = subfield.children
               .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
               .slice(0, 5);
 
             subfield.value = 0;
-            subfield.children.map((sc) => {
+            subfield.children.forEach((sc) => {
               subfield.value += parseFloat(sc.value);
             });
           });
@@ -35,7 +35,7 @@ export const useData = (selectedDomain) => {
             .slice(0, 5);
 
           // sub field - remove value attr
-          field.children.map((fd) => {
+          field.children.forEach((fd) => {
             delete fd.value;
           });
         });
