@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { LineChart } from "../components/WorksTrendLineChart/LineChart";
 import { Loading } from "../components/Loading";
 /* css */
-import "./ArticleTrend.css";
+import "./PaperTrend.css";
 
 const API_URL = "https://api.openalex.org/domains";
 const FIELD_ID = "https://openalex.org/fields/";
 
-export const ArticleTrend = () => {
+export const PaperTrend = () => {
   const [loading, setLoading] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
   const [dropdownMenus, setDropdownMenus] = useState([]);
