@@ -1,11 +1,10 @@
-export const AxisLeft = ({ yScale, text_wrap_count = 60 }) => {
-  const labelEllipsis = (text) => {
-    return text.length > text_wrap_count ? text.substring(0, 30) + "..." : text;
-  };
+import { labelEllipsis } from "../utils/chartUtils";
 
+export const AxisLeft = ({ yScale, text_wrap_count = 60 }) => {
   return yScale.domain().map((tickKey) => {
     const lastHyphenIndex = tickKey.lastIndexOf("-");
     const displayName = tickKey.substring(0, lastHyphenIndex);
+    const labelText = labelEllipsis(displayName, text_wrap_count);
 
     return (
       <g key={tickKey} className="tick">
@@ -15,7 +14,7 @@ export const AxisLeft = ({ yScale, text_wrap_count = 60 }) => {
           x={-3}
           y={yScale(tickKey) + yScale.bandwidth() / 2}
         >
-          {labelEllipsis(displayName)}
+          {labelText}
         </text>
       </g>
     );

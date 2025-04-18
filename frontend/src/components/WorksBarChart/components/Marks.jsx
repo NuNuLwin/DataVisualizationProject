@@ -1,5 +1,6 @@
 import React from "react";
 import { select, format } from "d3";
+import { getDynamicFontSize } from "../utils/chartUtils";
 
 const d3Format = format(",");
 
@@ -19,60 +20,62 @@ export const Marks = ({
   setSelectedWork,
   barCount,
 }) => {
-  const getDynamicFontSize = (count) => {
-    if (count <= 10) return 13;
-    if (count <= 15) return 11;
-    return 6;
-  };
-
   const fontSize = getDynamicFontSize(barCount);
 
-  return data.map((d, i) => {
+  const handleMouseOver = (e, d) => {
+    setSelectedWork(yValue(d));
+    const string = toolTipText(d);
+    select(tooltipRef.current)
+      .style("display", "block")
+      .html(string)
+      .style("left", `${e.pageX + 10}px`)
+      .style("top", `${e.pageY - 10}px`);
+  };
+
+  const handleMouseOut = () => {
+    select(tooltipRef.current).style("display", "none");
+    setSelectedWork(123);
+  };
+
+  const getBarFill = (d) => {
+    const workId = yValue(d);
+    const type = colorDataMap.get(colorValue(d));
+    const isDimmed =
+      (selectedWork !== 123 && selectedWork !== workId) ||
+      (selectedWork === 123 && selectedType && selectedType !== type);
+
+    return isDimmed ? "#ccc" : colorScale(type);
+  };
+
+  return data.map((d) => {
     const barHeight = yScale.bandwidth();
-    const textYPosition = yScale(yValue(d)) + barHeight / 2 + fontSize / 6; // Adjusted calculation
+    const yPos = yScale(yValue(d));
+    const textY = yPos + barHeight / 2 + fontSize / 6;
+    const xVal = xValue(d);
 
     return (
       <g
         key={yValue(d)}
         className="mark"
-        onMouseOver={(e) => {
-          setSelectedWork(yValue(d));
-          const string = toolTipText(d);
-          select(tooltipRef.current)
-            .style("display", "block")
-            .html(string)
-            .style("left", e.pageX + 10 + "px")
-            .style("top", e.pageY - 10 + "px");
-        }}
-        onMouseOut={() => {
-          select(tooltipRef.current).style("display", "none");
-          setSelectedWork(123);
-        }}
+        onMouseOver={(e) => handleMouseOver(e, d)}
+        onMouseOut={handleMouseOut}
       >
         <rect
-          className="mark"
           x={0}
-          y={yScale(yValue(d))}
+          y={yPos}
           height={barHeight}
-          width={xScale(xValue(d))}
-          fill={
-            (selectedWork !== 123 && selectedWork !== yValue(d)) ||
-            (selectedWork === 123 &&
-              selectedType &&
-              selectedType !== colorDataMap.get(colorValue(d)))
-              ? "#ccc"
-              : colorScale(colorDataMap.get(colorValue(d)))
-          }
+          width={xScale(xVal)}
+          fill={getBarFill(d)}
         />
         <text
-          x={xScale(xValue(d)) - 5} // 5px padding from right
-          y={textYPosition} // Properly centered vertically
+          x={xScale(xVal) - 5}
+          y={textY}
           fill="white"
           textAnchor="end"
-          dominantBaseline="middle" // Changed from alignmentBaseline
+          dominantBaseline="middle"
           style={{ fontSize: `${fontSize}px` }}
         >
-          {d3Format(xValue(d))}
+          {d3Format(xVal)}
         </text>
       </g>
     );

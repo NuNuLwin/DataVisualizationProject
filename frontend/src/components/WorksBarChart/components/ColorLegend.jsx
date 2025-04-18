@@ -9,6 +9,7 @@ export const ColorLegend = ({
 }) =>
   colorScale.domain().map((domainValue, i) => (
     <g
+      key={domainValue}
       className="tick legend-item"
       transform={`translate(0, ${i * tickSpacing})`}
       onClick={() =>

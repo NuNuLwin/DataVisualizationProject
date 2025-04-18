@@ -10,3 +10,4 @@ export const margin = {
 export const xAxisOffsetValue = 70;
 export const colorLegendLabel = "Work Type";
 export const fadeOpacity = 0.4;
+export const perPageOptions = [5, 10, 15];

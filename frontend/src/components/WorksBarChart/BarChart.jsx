@@ -29,7 +29,10 @@ import {
   xAxisOffsetValue,
   colorLegendLabel,
   fadeOpacity,
+  perPageOptions,
 } from "./utils/chartConstants";
+
+import { getTooltip } from "./utils/chartUtils";
 
 /* css */
 import "./styles/BarChart.css";
@@ -56,15 +59,13 @@ export const BarChart = ({
     return <Loading />;
   }
 
-  // console.log("Bar Chart Data ==>", data);
-
   /* Constants */
   const siFormat = format(".2s");
-  const xAxisTickFOrmat = (tickValue) => siFormat(tickValue).replace("G", "B");
+  const xAxisTickFormat = (tickValue) => siFormat(tickValue).replace("G", "B");
 
   const innerHeight = height - margin.top - margin.bottom;
   const innerWidth = width - margin.left - margin.right;
-  // console.log("=== Topic Data ===", data);
+  // console.log("=== Data ===", data);
 
   /* Value Selectors */
   const xValue = (d) => d.cited_by_count;
@@ -80,48 +81,9 @@ export const BarChart = ({
 
   const colorValue = (d) => d.display_name;
   const pubYearValue = (d) => d.publication_year;
-  const authorValue = (d) => {
-    let authors = [];
-    d.authorships.forEach((obj) => {
-      authors.push(obj?.author?.display_name || obj?.raw_author_name);
-    });
-    return authors.length > 20
-      ? authors.slice(0, 20).join(", ") + ", and more"
-      : authors.length > 0
-      ? authors.join(", ")
-      : "";
-  };
-  const institutionValue = (d) => {
-    let institutions = new Map();
-    d.authorships.forEach((author_obj) => {
-      author_obj.institutions.forEach((obj) => {
-        if (!institutions.get(obj.display_name)) {
-          institutions.set(obj.display_name, 1);
-        }
-      });
-    });
-    institutions = Array.from(institutions.keys());
-    return institutions.length > 20
-      ? institutions.slice(0, 20).join(", ") + " and more"
-      : institutions.length > 0
-      ? institutions.join(", ")
-      : "";
-  };
 
   /* Tooltip Text */
-  const toolTipText = (d) => {
-    return (
-      "<p>" +
-      yValue(d) +
-      "<br><br>Publication Year: " +
-      pubYearValue(d) +
-      "<br><br>Authors: " +
-      authorValue(d) +
-      "<br><br>Institutions: " +
-      institutionValue(d) +
-      "</p>"
-    );
-  };
+  const toolTipText = (d) => getTooltip(d, yValue, pubYearValue);
 
   /* Data Maps */
   const colorMap = new Map();
@@ -144,9 +106,11 @@ export const BarChart = ({
       <center>
         <label htmlFor="perPage">Works: </label>
         <select id="perPage" value={perPage} onChange={handlePerPageChange}>
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={15}>15</option>
+          {perPageOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
         </select>
       </center>
 
@@ -155,7 +119,7 @@ export const BarChart = ({
           <AxisBottom
             xScale={xScale}
             innerHeight={innerHeight}
-            tickFormat={xAxisTickFOrmat}
+            tickFormat={xAxisTickFormat}
           />
           <AxisLeft yScale={yScale} />
           <text
@@ -192,7 +156,7 @@ export const BarChart = ({
             yScale={yScale}
             xValue={xValue}
             yValue={yValue}
-            tooltipFormat={xAxisTickFOrmat}
+            tooltipFormat={xAxisTickFormat}
             colorScale={colorScale}
             colorDataMap={colorDataMap}
             colorValue={colorValue}
