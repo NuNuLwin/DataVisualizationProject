@@ -64,13 +64,7 @@ export const TopicTrend = () => {
         </div>
       </div>
 
-      <div
-        style={
-          {
-            // marginTop: REDUCED_MARGIN_TOP_BAR_CHART * -1,
-          }
-        }
-      >
+      <div>
         <h2 className="text-center">
           {selectedTopic?.data?.name
             ? `Top Papers for Topic: ${selectedTopic.data.name}`
