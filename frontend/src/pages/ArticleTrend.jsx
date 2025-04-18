@@ -13,28 +13,28 @@ export const ArticleTrend = () => {
   const [selectedField, setSelectedField] = useState(null);
   const [dropdownMenus, setDropdownMenus] = useState([]);
 
-  useEffect(async () => {
-    setLoading(true);
-    const response = await fetch(API_URL);
-    if (response.ok) {
-      let data = await response.json();
-      let menus = [];
-      menus = data.results.map((res) => {
-        let domain = {
-          id: res.id,
-          name: res.display_name,
-          levels: res.fields.map((field) => {
-            return {
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const response = await fetch(API_URL);
+      if (response.ok) {
+        const data = await response.json();
+        const menus = data.results.map((res) => {
+          return {
+            id: res.id,
+            name: res.display_name,
+            levels: res.fields.map((field) => ({
               id: field.id.replace(FIELD_ID, ""),
               name: field.display_name,
-            };
-          }),
-        };
-        return domain;
-      });
-      setDropdownMenus(menus);
+            })),
+          };
+        });
+        setDropdownMenus(menus);
+      }
       setLoading(false);
-    }
+    };
+
+    fetchData();
   }, []);
 
   return (
@@ -61,7 +61,7 @@ export const ArticleTrend = () => {
           <ul className="dropdown-menu">
             {dropdownMenus.map((menu) =>
               menu.levels.map((level) => (
-                <li>
+                <li key={`${menu.id}-${level.id}`}>
                   <span
                     className="dropdown-item"
                     href="#"

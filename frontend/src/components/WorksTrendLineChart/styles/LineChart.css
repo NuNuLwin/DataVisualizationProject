@@ -6,10 +6,6 @@
   fill: #635f5d;
 }
 
-.article-trend-line-chart .marks circle {
-  /* fill: #137B80; */
-}
-
 .article-trend-line-chart .marks path {
   fill: none;
   stroke-width: 1.5;
