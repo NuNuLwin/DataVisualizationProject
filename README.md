@@ -1,5 +1,7 @@
 # DataVisualizationProject
 
+🌐 **Live Demo**: [https://cs736-dataviz-nunu-swe-darshan.vercel.app/](https://cs736-dataviz-nunu-swe-darshan.vercel.app/)
+
 ## Built With
 
 This project is built entirely with **React** using **Visual Studio Code** on **macOS**.  
