@@ -1,29 +1,15 @@
 import axios from 'axios'
 
 const API_URL = 'https://api.openalex.org/';
-//const API_URL = 'https://api.openalex.org/works?filter=concepts.id:C121332964&per_page=40';
-//const API_CONCEPT_URL = 'https://api.openalex.org/concepts';
 
 const getInstitutionCollaboration = async(conceptId,year,institutionId)=>{
-  console.log("institutionService  conceptId ",conceptId+" year "+year);
   var url = "";
-  // if ((!conceptId || conceptId.trim() === "") && (!year|| year.trim() === "")) {
-  //    url = `${API_URL}works?per-page=200`; 
-  // }
-  // else if(conceptId && (!year|| year.trim() === "") ){
-  //   url = `${API_URL}works?filter=concepts.id:${conceptId}&per_page=100`;
-  // }
-  // else if((!conceptId || conceptId.trim() === "") && year){
-  //   url = `${API_URL}works?filter=publication_year:${year}&per_page=100`;
-  // }
-  // else if(conceptId && year){//I194028371
     if (institutionId){
       url = `${API_URL}works?filter=concepts.id:${conceptId},institutions.id:${institutionId},publication_year:${year}&per_page=200`;
     }else{
       url = `${API_URL}works?filter=concepts.id:${conceptId},publication_year:${year}&per_page=200`;
     }
- // }
-  console.log("institutionService work url based on param ",url);
+
   const response = await axios.get(url);
   return response.data;
 }
@@ -38,23 +24,16 @@ const getYears = async()=>{
 return response.data;
 }
 
-const getCoAuthorship = async(conceptId,institutionId,year, page = 1)=>{
+const getCoAuthorship = async(conceptId,sourceinstitutionId,targetinstitutionId,year, page = 1)=>{
   var url = "";
-  if(institutionId){
-    url = API_URL+`works?filter=concepts.id:${conceptId},institutions.id:${institutionId},publication_year:${year}&per-page=200&page=${page}`;
-  }else{
-    url = API_URL+`works?filter=concepts.id:${conceptId},publication_year:${year}&per-page=200&page=${page}`;
-  }
-   
-  console.log(" getCoAuthorship ",url);
-  const response = await axios.get(url);//'works?filter=abstract.search:machine learning&per-page=20'
+  url = API_URL+`works?filter=concepts.id:${conceptId},institutions.id:${sourceinstitutionId}|${targetinstitutionId},publication_year:${year}&per-page=200&page=${page}`;
+  const response = await axios.get(url);
   return response.data;
 }
 
 const getCountries = async() => {
   var url = API_URL+`countries`;
-  console.log(" getCountries ",url);
-  const response = await axios.get(url);//'works?filter=abstract.search:machine learning&per-page=20'
+  const response = await axios.get(url);
   return response.data;
 }
 

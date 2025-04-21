@@ -10,73 +10,30 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
     const tooltipRef = useRef();
     // Add a ref to track the original position
     const originalTooltipPosition = useRef({ x: 0, y: 0 });
-
-    // // Your exact final output array
-    // const coAuthorData = [
-    //   { 
-    //     id: "A1", 
-    //     name: "Alice", 
-    //     coAuthors: ["A2", "A3"]
-    //   },
-    //   { 
-    //     id: "A2", 
-    //     name: "Bob", 
-    //     coAuthors: ["A1"] 
-    //   },
-    //   { 
-    //     id: "A3", 
-    //     name: "Charlie", 
-    //     coAuthors: ["A1"] 
-    //   },
-    //   {
-    //     id: "A4",
-    //     name: "Diana",
-    //     coAuthors: ["A2"] // Added to match your sample data
-    //   }
-    // ];
   
     useEffect(() => {
         if (!coAuthorData || coAuthorData.length === 0) return;
-
-         // First filter: Only include authors with >2 co-authors
         const filteredData = coAuthorData.filter(author => 
           author.coAuthors.length > 2
         );
-
-        // Second filter: Only include co-authors that exist in our filtered set
         const validAuthorIds = new Set(filteredData.map(a => a.id));
         const finalData = filteredData.map(author => ({
           ...author,
           coAuthors: author.coAuthors.filter(coId => validAuthorIds.has(coId))
         }));
 
-        // Third filter: Remove authors who now have ≤2 co-authors after filtering
         const stronglyConnectedData = finalData.filter(author => 
           author.coAuthors.length > 2
         );
-
-        console.log("Filtered network data:", stronglyConnectedData);
-
 
         // **** Prepare nodes and links directly from coAuthorData
         const nodes = stronglyConnectedData.map(author => ({//coAuthorData.map(author => ({
           id: author.id,
           name: author.name,
-          size:(author.coAuthors.length * 0.5)+ 5// 5////author.coAuthors.length + 2 // Dynamic sizing
+          size:(author.coAuthors.length * 0.5)+ 5
         }));
   
       const links = [];
-      // stronglyConnectedData.forEach(author => {//coAuthorData.forEach(author => {
-      //   author.coAuthors.forEach(targetId => {
-      //     //if (coAuthorData.some(n => n.id === targetId)) { 
-      //         links.push({
-      //           source: author.id,
-      //           target: targetId
-      //         });
-      //     //}
-      //   });
-      // });
-      
       const nodeIds = new Set(nodes.map(n => n.id));
       stronglyConnectedData.forEach(author => {
         author.coAuthors.forEach(targetId => {
@@ -98,13 +55,12 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
           if (graph.hasNode(link.source) && graph.hasNode(link.target)) {
             graph.addEdge(link.source, link.target);
           }
-          //graph.addEdge(link.source, link.target)
       });
 
          // Detect communities with Louvain
         const communities = louvain.assign(graph, {
-            resolution: 1.0, // Default resolution
-            getEdgeWeight: null // Treat all edges equally
+            resolution: 1.0, 
+            getEdgeWeight: null 
         });
     
         // Assign communities to nodes
@@ -112,16 +68,12 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
             node.community = graph.getNodeAttribute(node.id, 'community');
         });
 
-        // const communities = louvain.assign(graph);
-        // nodes.forEach(node => node.community = communities[node.id]);
-
         // Color scale
         const color = d3.scaleOrdinal(d3.schemeTableau10);
-    
         
       // **** Set up SVG
       const width = 1000, height = 700;
-      const padding = 10; // Safe area padding
+      const padding = 10;
 
       const svg = d3.select(svgRef.current)
         .attr("width", width)
@@ -149,23 +101,15 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
          
       // Create simulation
       const simulation = d3.forceSimulation(nodes)
-        // .force("link", d3.forceLink(links).id(d => d.id).distance(100))
-        // .force("charge", d3.forceManyBody().strength(-100))
         .force("link", d3.forceLink(links)
             .id(d => d.id)
-            .distance(100) // Reduced from 100 to bring nodes closer
-            //.strength(0.8) // Stronger links to keep clusters tight
+            .distance(100) 
         )
         .force("charge", d3.forceManyBody()
-            .strength(-30) // Reduced repulsion (from -100)
+            .strength(-30)
         )
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("boundary", () => boundaryForce(nodes, width, height, padding)) // Add boundary force
-        // .force("collide", d3.forceCollide() // Add collision detection
-        // .radius(d => d.size + 2) // Based on node size
-        // .strength(0.7)
-        // );
-        
+        .force("boundary", () => boundaryForce(nodes, width, height, padding))
 
       // Draw links
       const link = svg.append("g")
@@ -183,8 +127,7 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
         .join("circle")
         .attr("r", d => d.size)
         .attr("fill", "#4dabf7")
-        //.attr("stroke", "#228be6")
-        .attr("fill", d => color(d.community))//color by cluster
+        .attr("fill", d => color(d.community))
         .attr("stroke-width", 2)
         .style("pointer-events", "visiblePainted") 
         .call(drag(simulation)
@@ -197,7 +140,7 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
         .join("text")
         .text(d => d.name)
         .attr("font-size", "12px")
-        .attr("dx", d => d.size + 5) // Position outside circle
+        .attr("dx", d => d.size + 5) 
         .attr("dy", "0.35em")
         .attr("fill", "#495057");
   
@@ -237,50 +180,12 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
           });
       }
 
-      // function drag(simulation) {
-      //   function dragstarted(event, d) {
-      //     if (!event.active) simulation.alphaTarget(0.3).restart();
-      //     d.fx = d.x;
-      //     d.fy = d.y;
-      //     // Bring node to front
-      //     event.sourceEvent.stopPropagation();
-      //     d3.select(this).raise();
-      //   }
-      
-      //   function dragged(event, d) {
-      //     d.fx = event.x;
-      //     d.fy = event.y;
-      //   }
-      
-      //   function dragended(event, d) {
-      //     if (!event.active) simulation.alphaTarget(0);
-      //     d.fx = null;
-      //     d.fy = null;
-      //   }
-      
-      //   return d3.drag()
-      //     .on("start", dragstarted)
-      //     .on("drag", dragged)
-      //     .on("end", dragended);
-      // }
-        // // Add viewBox to enable pan/zoom if nodes go out of view
-        // svg.attr("viewBox", [0, 0, width, height])
-        // .attr("preserveAspectRatio", "xMidYMid meet");;
-
          // ********* Tooltip interaction
          // Track last click position
           const showTooltip = (event, d, showAll = false) => {
             console.log("d id ",d.id);
             event.stopPropagation();
 
-            // if (event) {
-            //   event.stopPropagation();
-            //   lastClickPosition.current = {
-            //     x: event.pageX - 30,
-            //     y: event.pageY - 150
-            //   };
-            // }
-             // Store original position on first show
             if (!showAll) {
               originalTooltipPosition.current = {
                 x: event.pageX + 15,
@@ -309,25 +214,6 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
             )
             .join('');
 
-            // const displayCoAuthors = () => {
-            //   if (showAll || coAuthorCount <= 5) {
-            //     return author.coAuthors.map(id => {
-            //       const coAuthor = coAuthorData.find(a => a.id === id);
-            //       return `<li>${coAuthor?.name || id}</li>`;
-            //     }).join("");
-            //   } else {
-            //     const topCoAuthors = author.coAuthors.slice(0, 3).map(id => {
-            //       const coAuthor = coAuthorData.find(a => a.id === id);
-            //       return `<li>${coAuthor?.name || id}</li>`;
-            //     }).join("");
-                
-            //     return `
-            //       ${topCoAuthors}
-            //       <li class="more-link">and ${coAuthorCount - 3} more...</li>
-            //     `;
-            //   }
-            // };
-
             tooltip
               .html(`
                 <strong>${d.name}</strong>
@@ -350,38 +236,15 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
               .style("opacity", 1)
               .style("max-width", "400px");
 
-            // tooltip
-            // .html(`
-            //   <strong>Hello!</strong>
-            // `)
-            // .style("left", `${showAll ? originalTooltipPosition.current.x : event.pageX + 15}px`)
-            // .style("top", `${showAll ? originalTooltipPosition.current.y : event.pageY + 15}px`)
-            // .style("opacity", 1);
-
-
-            // // Add click handler for "more" link if not showing all
-            // if (!showAll && coAuthorCount > 5) {
-            //   tooltip.select(".more-link")
-            //     .on("click", function(event) {
-            //       event.stopPropagation();
-            //       showTooltip(event, d, true);
-            //     });
-            // }
-
           };
         
           node.on("click", (event, d) => {
             console.log("Node onClick");
             event.stopPropagation();
-            // Only show tooltip if not dragging
            if (!event.defaultPrevented) {
               showTooltip(event, d);
            }
           });
-       
-          // svg.on("mousedown", () => {
-          //   console.log("Mouse down on SVG background");
-          // });
 
           // Close tooltip when clicking anywhere
           const closeTooltip = () => {
@@ -401,30 +264,18 @@ const CoAuthorshipNetworkGraph = ({ coAuthorData }) => {
     return (
       <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
         <svg ref={svgRef} />
-
-        {/* Add this tooltip div */}
         <div ref={tooltipRef} id="tooltip" style={{
         position: 'absolute',
         padding: '10px',
         background: 'white',
         border: '1px solid #ddd',
         borderRadius: '4px',
-        pointerEvents: 'auto', // Changed to allow clicking inside
+        pointerEvents: 'auto',
         opacity: 0,
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         zIndex: 100,
         maxWidth: '300px'
       }}></div>
-        {/* <div id="tooltip" style={{
-          position: 'absolute',
-          padding: '10px',
-          background: 'white',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          pointerEvents: 'none',
-          opacity: 0,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}></div> */}
 
         <div style={{ marginTop: '20px', color: '#868e96' }}>
           <p>Drag nodes to explore connections. Node size represents number of co-authors.</p>

@@ -9,7 +9,7 @@ import axios from 'axios'
 import { FaTimes } from "react-icons/fa"; 
 
 import { processWorks,prepareChordData,getCountryName } from "../utils/utils";
-
+import { CoAuthorship } from "./CoAuthorship";
 
 export const InstitutionCollaboration = () => {
   const dispatch = useDispatch();
@@ -18,21 +18,20 @@ export const InstitutionCollaboration = () => {
   const [conceptData, setConceptData] = useState([]);
   const [selectedConceptDisplayname, setSelectedConceptDisplayname] = useState("");
   const [selectedConcept, setSelectedConcept] = useState("");
+  const [selectedConceptId, setSelectedConceptId] = useState("");
 
   const [yearData, setYearData] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
 
-    // New states for institution search
-   // const [searchTerm, setSearchTerm] = useState("");
-   const [searchInput, setSearchInput] = useState(""); // What's typed in the box
-   const [displayValue, setDisplayValue] = useState(""); // What's displayed in the box
-    const [searchResults, setSearchResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [searchError, setSearchError] = useState(null);
-    const [selectedInstitution, setSelectedInstitution] = useState("");
-    const [selectedInstitutionsList, setSelectedInstitutionsList] = useState([]);
-    const [showClearButton, setShowClearButton] = useState(false);
-  // Add this ref to track if we're setting a selection
+  const [searchInput, setSearchInput] = useState(""); 
+  const [displayValue, setDisplayValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+  const [selectedInstitution, setSelectedInstitution] = useState("");
+  const [selectedInstitutionsList, setSelectedInstitutionsList] = useState([]);
+  const [showClearButton, setShowClearButton] = useState(false);
+ 
   const isSettingSelection = useRef(false);
 
   const [displayMessage,setDisplayMessage] = useState("");
@@ -40,35 +39,19 @@ export const InstitutionCollaboration = () => {
   const [Matrix, setMatrix] = useState([]);
   const [institutions, setInstitutions] = useState([]);
 
+  const [sourceInstitutionId, setSourceInstitutionId] = useState("");
+  const [targetInstitutionId, setTargetInstitutionId] = useState("");
+  const [sourceInstitutionName, setSourceInstitutionName] = useState("");
+  const [targetInstitutionName, setTargetInstitutionName] = useState("");
+  const [showCoauthorGraph, setShowCoauthrGraph] = useState(false);
   //*********************** Work ****************** //
   useEffect(() => {
     if(Matrix.length == 0 && institutions.length == 0 && works.results.length>0){
       console.log("after works data retrieved, clean matrix data first and processWorks and prepare for cord data ");
-      const  collaborationCounts  = processWorks(works.results);//const collaborationCounts = processWorks(works.results);//const {collaborationCounts,institutionCountryMap} = processWorks(works.results);
+      const  collaborationCounts  = processWorks(works.results);
 
-      //  // Extract unique countries for dropdown
-      // const uniqueCountryCodes = [...new Set(Object.values(institutionCountryMap))];
-      // const countries = uniqueCountryCodes
-      // .map(code => ({
-      //   code,
-      //   name: getCountryName(code) // Convert code to readable name
-      // }))
-      // .sort((a, b) => a.name.localeCompare(b.name)); // Alphabetical sort
-      // setAvailableCountries(countries);
-     
-      //  // 3. Auto-select first country if none selected
-      //  if (!selectedCountry && countries.length > 0) {
-      //   setSelectedCountry(countries[0].code);
+      const { matrix, institutionList } = prepareChordData(collaborationCounts,works.results);
 
-      // }
-
-      // const { matrix, institutionList } = prepareChordData(
-      //   collaborationCounts,
-      //   institutionCountryMap,
-      //   selectedCountry
-      // ); 
-      const { matrix, institutionList } = prepareChordData(collaborationCounts);//const { matrix, institutionList } = prepareChordData({ collaborationCounts, institutionAppearances }, 15);
-      console.log("getData from prepareChordData ",matrix.length+" "+institutionList.length);
       if(matrix.length != 0 && institutionList.length != 0){
         setMatrix(matrix);
         setInstitutions(institutionList);
@@ -79,27 +62,19 @@ export const InstitutionCollaboration = () => {
           No Institutional Collaborations found for field: <strong>{selectedConceptDisplayname}</strong>
           ,Years: <strong>{selectedYear}</strong>.
           </>
-          // "No Collaborations found for \n Concept: "+selectedConceptDisplayname+" Years: "+selectedYear
         );
       }
     }
   }, [Matrix,institutions]);
 
   useEffect(() => {
-    console.log("works data retrieved ");
     if(works.results.length>0 && !isLoading){
-        console.log("work count ",works.results.length);
-        // const collaborationCounts = processWorks(works.results);
-        // const { matrix, institutionList } = prepareChordData(collaborationCounts);
-        // setMatrix(matrix);
-        // setInstitutions(institutionList);
-
         setMatrix([]);
         setInstitutions([]);
       }
 
   }, [works,isLoading]);
-  //retrieve work based on selected concept.
+ 
   useEffect(() => {
     if(selectedConcept === "" || selectedYear === ""){
       return;
@@ -111,24 +86,19 @@ export const InstitutionCollaboration = () => {
         }else{
           cleanedConceptId = cleanedConceptId;
         }
-    
-        console.log("selectedConcept ",cleanedConceptId+" selectedYear "+selectedYear);
+        setSelectedConceptId(cleanedConceptId);
         dispatch(getInstitutionCollaboration({conceptId:cleanedConceptId,year:selectedYear,institutionId:selectedInstitution}));
     }
-  }, [selectedConcept,selectedYear,selectedInstitution]);// this will run as first time.
+  }, [selectedConcept,selectedYear,selectedInstitution]);
 
   //********************** Concepts ******************** //
   useEffect(() => {
-    console.log("receive concepts response ",concepts.results[0]);
     if(concepts.results.length>0){
-      // add to concept data
       setConceptData(concepts.results.map((c) => ({ id: c.id, name: c.display_name })));
-
-      // set default selected concept.
       const conceptId = concepts.results[0].id.match(/C\d+$/)?.[0];
       const conceptName = concepts.results[0].display_name;
       setSelectedConcept(conceptId);
-      setSelectedConceptDisplayname(conceptName)
+      setSelectedConceptDisplayname(conceptName);
     }
   }, [concepts]);
 
@@ -142,23 +112,19 @@ export const InstitutionCollaboration = () => {
     console.log("receive years response ",years.group_by[0]);
     if(years.group_by.length>0){
       const sortedYears = [...years.group_by]
-      .filter(year => parseInt(year.key) >= 1998)  // Remove years less than 2000
-      .sort((a, b) => parseInt(a.key) - parseInt(b.key)); // Sort in ascending order
-      //.sort((a, b) => parseInt(b.key) - parseInt(a.key)); // Sort in descending order
+      .filter(year => parseInt(year.key) >= 1998)
+      .sort((a, b) => parseInt(a.key) - parseInt(b.key));
 
-        // Group sorted years into ranges (e.g., 2023-2020, 2022-2021, ...)
         const ranges = [];
         for (let i = 0; i < sortedYears.length; i += 2) {
-          const yearStart = sortedYears[i].key; // Start of the range
-          const yearEnd = sortedYears[i + 1]?.key || sortedYears[i].key; // End of the range (if there are fewer than 3 years left, use the start year)
+          const yearStart = sortedYears[i].key;
+          const yearEnd = sortedYears[i + 1]?.key || sortedYears[i].key;
           
           ranges.push(`${yearStart}-${yearEnd}`);
         };
         ranges.reverse();
         
-        // add the year ranges data 
         setYearData(ranges);
-        // Set Default selected year range.
         setSelectedYear(ranges[0]);
     }
   }, [years]);
@@ -181,7 +147,7 @@ export const InstitutionCollaboration = () => {
     try {
       const response = await axios.get('https://api.openalex.org/institutions', {
         params: {
-          search: searchInput,//searchTerm,
+          search: searchInput,
           per_page: 10
         }
       });
@@ -197,15 +163,14 @@ export const InstitutionCollaboration = () => {
    // Function to select an institution
    const handleSelectInstitution = (institution) => {
     setSelectedInstitution(institution.id);
-    setDisplayValue(institution.display_name);//setSearchTerm(institution.display_name);// Show selected institution in search box
-    setShowClearButton(true); // Show the clear button
-    setSearchResults([]); // Clear search results
-    // isSettingSelection.current = false;
+    setDisplayValue(institution.display_name);
+    setShowClearButton(true); 
+    setSearchResults([]);
   };
 
     // Add this new function to handle clearing
     const handleClearSearch = () => {
-      setSearchInput("");//setSearchTerm("");
+      setSearchInput("");
       setDisplayValue("");
       setSelectedInstitution("");
       setShowClearButton(false);
@@ -213,11 +178,9 @@ export const InstitutionCollaboration = () => {
       
     };
 
-    // Function to remove an institution from the selected list
     const handleRemoveInstitution = (institutionId) => {
       setSelectedInstitutionsList(prev => prev.filter(item => item.id !== institutionId));
-      
-      // Clear selected institution if it's the one being removed
+    
       if (selectedInstitution?.id === institutionId) {
         setSelectedInstitution(null);
       }
@@ -225,8 +188,6 @@ export const InstitutionCollaboration = () => {
 
   // Debounce search
   useEffect(() => {
-   // if (isSettingSelection.current) return; // Skip search when setting selection
-
     const timerId = setTimeout(() => {
       if (searchInput.trim()) {
         searchInstitutions();
@@ -236,14 +197,22 @@ export const InstitutionCollaboration = () => {
     }, 500);
 
     return () => clearTimeout(timerId);
-  }, [searchInput]);//searchTerm
+  }, [searchInput]);
 
+
+  const handleChordClick = (data) => {
+    console.log("handleChordClick:", data.sourceInstitutionId+" "+data.targetInstitutionId);
+    setSourceInstitutionId(data.sourceInstitutionId);
+    setTargetInstitutionId(data.targetInstitutionId);
+    setSourceInstitutionName(data.sourceInstitutionName);
+    setTargetInstitutionName(data.targetInstitutionName);
+    setShowCoauthrGraph(true);
+  };
 
   return (
-    // <div className="container">
+    <div>
       <div className="card institution-wrapper">
       <h3>Chord Diagram of Institutional Collaborations (≥2 Joint Publications)</h3>
-      {/*  Research Collaboration Network: Institutions with 2+ Shared Publications*/}
       <div className="filters">
         <label className="filter-label">
           Filter by Field:
@@ -252,7 +221,6 @@ export const InstitutionCollaboration = () => {
             value={selectedConcept}
             onChange={(e) =>{ 
               setSelectedConcept(e.target.value)
-              // Find the display name of the selected concept
               const selectedConceptObj = conceptData.find((concept) => concept.id === e.target.value);
               setSelectedConceptDisplayname(selectedConceptObj ? selectedConceptObj.name : '');
             }}
@@ -292,10 +260,10 @@ export const InstitutionCollaboration = () => {
           <input
               type="text"
               placeholder="Search institutions by name..."
-              value={displayValue || searchInput}//{searchTerm}
+              value={displayValue || searchInput}
               onChange={(e) => {
                 console.log("search institution ",e.target.value)
-                setSearchInput(e.target.value);//setSearchTerm(e.target.value);
+                setSearchInput(e.target.value);
                 setDisplayValue(e.target.value);
                 setShowClearButton(e.target.value.length > 0);
                 if (!e.target.value) {
@@ -346,24 +314,35 @@ export const InstitutionCollaboration = () => {
       <br></br>
       <br></br>
       <div className="graph-container">
-        {/* {Matrix.length > 0 && institutions.length > 0 ? (
-          <ChordDiagram matrix={Matrix} institutions={institutions} />
-        ) : (
-          <p>{displayMessage === "" ? "Loading..." : displayMessage}</p>
-          )
-        } */}
 
         {isLoading ? (
               <p>Loading institution data...</p>
         ) : Matrix.length > 0 && institutions.length > 0 ? (
           <div >
-            <ChordDiagram matrix={Matrix} institutions={institutions} />
+            <ChordDiagram matrix={Matrix} institutions={institutions}  onChordClick={handleChordClick} />
           </div>
         ) :   <p>{displayMessage}</p>}
 
       </div>
+
+  
+    </div>
+      <div className="coauthor-wrapper">
+        { showCoauthorGraph ? (
+          <CoAuthorship
+                field = {selectedConceptId}
+                year = {selectedYear}
+                sourceInstitutionId= {sourceInstitutionId}
+                targetInstitutionId = {targetInstitutionId}
+                sourceInstitutionName = {sourceInstitutionName}
+                targetInstitutionName = {targetInstitutionName}
+            />
+        ) : (
+          ""
+        )
+        }
+      </div>
+
     </div>
   );
 };
-
-// export default InstitutionCollaboration;

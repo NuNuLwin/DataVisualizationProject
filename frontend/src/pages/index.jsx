@@ -13,7 +13,6 @@ function Index() {
       <TopicTrend />
       <PaperTrend />
       <InstitutionCollaboration />
-      <CoAuthorship />
     </div>
   );
 }

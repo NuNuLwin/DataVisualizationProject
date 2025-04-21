@@ -28,7 +28,6 @@ const initialState = {
 }
 
 export const getInstitutionCollaboration = createAsyncThunk('institutionCollaboration/getInstitutionCollaboration',async ({conceptId,year,institutionId},thunkAPI) =>{
-    console.log("institutionSlice conceptId ",conceptId+" year "+year+" institutionId "+institutionId);
     try {
         return await institutionService.getInstitutionCollaboration(conceptId,year,institutionId)
     } catch (error) {
@@ -38,7 +37,6 @@ export const getInstitutionCollaboration = createAsyncThunk('institutionCollabor
 })
 
 export const getConcepts = createAsyncThunk('institutionCollaboration/getConcepts',async (thunkAPI) =>{
-    console.log("");
     try {
         return await institutionService.getConcepts()
     } catch (error) {
@@ -48,7 +46,6 @@ export const getConcepts = createAsyncThunk('institutionCollaboration/getConcept
 })
 
 export const getYears = createAsyncThunk('institutionCollaboration/getYears',async (thunkAPI) =>{
-    console.log("");
     try {
         return await institutionService.getYears()
     } catch (error) {
@@ -57,14 +54,12 @@ export const getYears = createAsyncThunk('institutionCollaboration/getYears',asy
     }
 })
 
-export const getCoAuthorship = createAsyncThunk('institutionCollaboration/getCoAuthorship',async ({conceptId,institutionId,year},thunkAPI) =>{
-    console.log("");
+export const getCoAuthorship = createAsyncThunk('institutionCollaboration/getCoAuthorship',async ({conceptId,sourceinstitutionId,targetinstitutionId,year},thunkAPI) =>{
     try {
           // Create an array of promises for 3 pages
         const pagePromises = [
-            institutionService.getCoAuthorship(conceptId,institutionId,year, 1),
-            institutionService.getCoAuthorship(conceptId,institutionId,year, 2),
-           // institutionService.getCoAuthorship(conceptId, 3)
+            institutionService.getCoAuthorship(conceptId,sourceinstitutionId,targetinstitutionId,year, 1),
+            institutionService.getCoAuthorship(conceptId,sourceinstitutionId,targetinstitutionId,year, 2),
         ];
 
          // Wait for all requests to complete
@@ -72,10 +67,9 @@ export const getCoAuthorship = createAsyncThunk('institutionCollaboration/getCoA
         // Combine all results
         const combinedData = {
             results: results.flatMap(result => result.results),
-            meta: results[0].meta // Take meta from first page
+            meta: results[0].meta 
         };
         return combinedData;
-       // return await institutionService.getCoAuthorship(conceptId)
     } catch (error) {
         const message = error?.response?.data?.message || "";
       return thunkAPI.rejectWithValue(message)
